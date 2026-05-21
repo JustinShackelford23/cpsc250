@@ -1,4 +1,4 @@
 #!/bin/sh
-echo "Branch: $1"
+branch =$(git rev-parse --abrev-ref HEAD)
 git commit -am "Updates"
-git push origin $1
+git push origin $branch
