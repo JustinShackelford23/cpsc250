@@ -1,0 +1,211 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tikz}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Multiple Inheritance and Mixin Classes}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Multiple Inheritance}
+
+Python allows a class to inherit from more than one base class.
+
+This is called \textbf{multiple inheritance}.
+
+For example:
+
+\begin{lstlisting}[language=Python]
+class Bat(Winged, Mammal):
+    pass
+\end{lstlisting}
+
+A bat is both winged and a mammal, so it may make sense for it to inherit from both classes.
+
+\section{Conceptual Example}
+
+Suppose:
+
+\begin{lstlisting}[language=Python]
+class Winged:
+
+    def flap_wings(self):
+        print("flap flap")
+
+
+class Mammal:
+
+    def breathe(self):
+        print("breathing")
+
+    def give_birth(self):
+        print("giving birth")
+\end{lstlisting}
+
+Then:
+
+\begin{lstlisting}[language=Python]
+class Bat(Winged, Mammal):
+    pass
+\end{lstlisting}
+
+A \texttt{Bat} object can use methods inherited from both parent classes.
+
+\section{Method Name Conflicts}
+
+A complication arises if both base classes define a method with the same name.
+
+For example, suppose both parent classes define:
+
+\begin{lstlisting}[language=Python]
+blink()
+\end{lstlisting}
+
+Which version does Python use?
+
+\section{Method Resolution Order}
+
+Python uses the method from the first base class listed, according to its method resolution order.
+
+For example:
+
+\begin{lstlisting}[language=Python]
+class Bat(Winged, Mammal):
+    pass
+\end{lstlisting}
+
+If both \texttt{Winged} and \texttt{Mammal} define \texttt{blink()}, Python will search \texttt{Winged} first.
+
+\section{Mixin Classes}
+
+A mixin is a class designed to add a small piece of behavior to another class.
+
+Mixin classes are not usually intended to stand alone.
+
+They are used to compose behavior.
+
+\section{Transport Example}
+
+Suppose we begin with a base class:
+
+\[
+\texttt{TransportMode}
+\]
+
+Then we want to create:
+
+\begin{itemize}
+    \item a \texttt{Truck},
+    \item a \texttt{FlyingCar}.
+\end{itemize}
+
+Both are transport modes, but they move differently.
+
+\section{Driving Mixin}
+
+\begin{lstlisting}[language=Python]
+class DrivingMixin:
+
+    def drive(self, distance):
+        print(f"Driving {distance} miles")
+\end{lstlisting}
+
+\section{Flying Mixin}
+
+\begin{lstlisting}[language=Python]
+class FlyingMixin:
+
+    def fly(self, distance, altitude):
+        print(f"Flying {distance} miles at {altitude} feet")
+\end{lstlisting}
+
+\section{Using Mixins}
+
+A truck can drive:
+
+\begin{lstlisting}[language=Python]
+class Truck(TransportMode, DrivingMixin):
+
+    def go(self, distance):
+        self.drive(distance)
+\end{lstlisting}
+
+A flying car can both fly and drive:
+
+\begin{lstlisting}[language=Python]
+class FlyingCar(TransportMode, DrivingMixin, FlyingMixin):
+
+    def go(self, distance):
+        self.fly(distance / 2, self.altitude)
+        self.drive(distance / 2)
+\end{lstlisting}
+
+\section{Why Mixins Are Useful}
+
+Mixins allow us to keep behavior modular.
+
+Instead of copying the same \texttt{drive()} method into several classes, we define it once and inherit it where needed.
+
+This supports:
+
+\begin{itemize}
+    \item code reuse,
+    \item cleaner design,
+    \item better encapsulation,
+    \item simpler maintenance.
+\end{itemize}
+
+\section{Using the Objects}
+
+The end user should be able to write:
+
+\begin{lstlisting}[language=Python]
+s = Truck(...)
+f = FlyingCar(...)
+
+s.go(100)
+f.go(100)
+\end{lstlisting}
+
+and have both objects behave appropriately.
+
+This is another example of polymorphism.
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item Python supports multiple inheritance.
+    \item A class can inherit from more than one parent class.
+    \item If method names conflict, Python follows method resolution order.
+    \item Mixins add focused behavior to classes.
+    \item Mixins help avoid duplicate code.
+    \item Polymorphism allows different objects to use the same interface.
+\end{itemize}
+
+\end{document}

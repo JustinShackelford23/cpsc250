@@ -1,0 +1,262 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tikz}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Inheritance and Polymorphism}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+In many programs, several classes share many of the same features.
+
+If we write those features separately in every class, we duplicate code.
+
+That is inefficient and hard to maintain.
+
+Inheritance gives us a better strategy.
+
+\section{The Basic Idea}
+
+Inheritance allows us to define a base class containing common information and behavior.
+
+Derived classes then inherit from that base class and add specialized information.
+
+\section{Example: Businesses}
+
+Suppose we want to model several kinds of businesses.
+
+A general \texttt{Business} class might contain:
+
+\begin{itemize}
+    \item name,
+    \item address,
+    \item hours of operation.
+\end{itemize}
+
+A \texttt{Restaurant} class might include all of that plus:
+
+\begin{itemize}
+    \item cuisine type,
+    \item rating.
+\end{itemize}
+
+A \texttt{CarDealership} class might include all business information plus:
+
+\begin{itemize}
+    \item car makes sold,
+    \item average price by make.
+\end{itemize}
+
+\section{Example: Grocery Store Items}
+
+Another example is grocery store items.
+
+The base class might be:
+
+\[
+\texttt{Item}
+\]
+
+with:
+
+\begin{itemize}
+    \item name,
+    \item quantity.
+\end{itemize}
+
+Derived classes might include:
+
+\begin{itemize}
+    \item \texttt{Produce},
+    \item \texttt{Cereal},
+    \item \texttt{Meat}.
+\end{itemize}
+
+Each derived class has the base features, plus additional specialized features.
+
+\section{Base Class: Item}
+
+\begin{lstlisting}[language=Python]
+class Item:
+
+    def __init__(self):
+        self.name = ""
+        self.quantity = 0
+
+    def set_name(self, name):
+        self.name = name
+
+    def set_quantity(self, quantity):
+        self.quantity = quantity
+
+    def display(self):
+        print(self.name, self.quantity)
+\end{lstlisting}
+
+\section{Derived Class: Produce}
+
+\begin{lstlisting}[language=Python]
+class Produce(Item):
+
+    def __init__(self):
+        Item.__init__(self)
+        self.expiration = ""
+
+    def set_expiration(self, expiration):
+        self.expiration = expiration
+
+    def get_expiration(self):
+        return self.expiration
+\end{lstlisting}
+
+\section{Calling the Base Class Constructor}
+
+The line:
+
+\begin{lstlisting}[language=Python]
+Item.__init__(self)
+\end{lstlisting}
+
+is an explicit call to the base class constructor.
+
+This initializes the inherited variables:
+
+\begin{itemize}
+    \item \texttt{name},
+    \item \texttt{quantity}.
+\end{itemize}
+
+This must be done because Python does not automatically call the base constructor in this style.
+
+\section{Main Program Example}
+
+\begin{lstlisting}[language=Python]
+item1 = Item()
+item1.set_name("Cereal")
+item1.set_quantity(9)
+item1.display()
+
+item2 = Produce()
+item2.set_name("Apples")
+item2.set_quantity(40)
+item2.set_expiration("5/5/2024")
+item2.display()
+
+print(f"Expires on {item2.get_expiration()}")
+\end{lstlisting}
+
+\section{Why This Is Useful}
+
+The derived class \texttt{Produce} can use inherited methods from \texttt{Item}:
+
+\begin{itemize}
+    \item \texttt{set\_name()},
+    \item \texttt{set\_quantity()},
+    \item \texttt{display()}.
+\end{itemize}
+
+It only needs to define what is new:
+
+\begin{itemize}
+    \item expiration date.
+\end{itemize}
+
+\section{Polymorphism}
+
+Polymorphism means that different classes can be treated in a common way.
+
+For example, if several objects all have a method called:
+
+\begin{lstlisting}[language=Python]
+display()
+\end{lstlisting}
+
+then code can call \texttt{display()} without needing to know exactly which type of object it is handling.
+
+\section{Inheritance Chains}
+
+Inheritance can continue over multiple levels.
+
+For example:
+
+\[
+\texttt{Base}
+\rightarrow
+\texttt{DerivedOne}
+\rightarrow
+\texttt{DerivedTwo}
+\]
+
+Each class adds information to the previous class.
+
+\begin{lstlisting}[language=Python]
+class Base:
+
+    def __init__(self):
+        self.name = ""
+
+
+class DerivedOne(Base):
+
+    def __init__(self):
+        Base.__init__(self)
+        self.address = ""
+
+
+class DerivedTwo(DerivedOne):
+
+    def __init__(self):
+        DerivedOne.__init__(self)
+        self.zip_code = ""
+\end{lstlisting}
+
+\section{Important Design Point}
+
+The notes emphasize that explicitly calling the base class constructor may feel unusual if you come from other languages.
+
+However, it reflects the spirit of inheritance:
+
+\begin{quote}
+The derived class should intentionally initialize the base-class portion of itself.
+\end{quote}
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item Inheritance reduces duplicated code.
+    \item A base class stores common features.
+    \item A derived class adds specialized features.
+    \item Derived classes can use inherited methods.
+    \item Python often requires explicit base constructor calls.
+    \item Polymorphism allows different objects to be used through common methods.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,223 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tikz}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Derived Classes and Default Values}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+Object-oriented programming becomes much more powerful when we can create new classes from existing classes.
+
+This is called \textbf{inheritance}.
+
+A derived class inherits variables and methods from a base class, then adds more specific behavior.
+
+\section{Base Class: Transportation}
+
+Suppose we begin with a general class representing a transportation mode.
+
+\begin{lstlisting}[language=Python]
+class Transportation:
+
+    def __init__(self, name, speed=75):
+        self.name = name
+        self.speed = speed
+
+    def info(self):
+        print(f"{self.name} can go {self.speed} mph")
+\end{lstlisting}
+
+The default speed is:
+
+\[
+75 \text{ mph}
+\]
+
+This means that if the user does not specify a speed, Python uses 75 automatically.
+
+\section{Why Use a Base Class?}
+
+There are many modes of transportation:
+
+\begin{itemize}
+    \item motorized vehicles,
+    \item self-powered vehicles,
+    \item flight vehicles,
+    \item water vehicles,
+    \item and many others.
+\end{itemize}
+
+All of these are transportation modes, so it is useful to put common features in a shared base class.
+
+\section{Derived Class: MotorizedVehicle}
+
+A motorized vehicle is a transportation mode, but it has additional properties.
+
+For example, it has:
+
+\begin{itemize}
+    \item miles per gallon,
+    \item fuel level,
+    \item ability to add fuel,
+    \item ability to drive.
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+class MotorizedVehicle(Transportation):
+
+    def __init__(self, name, speed=80, mpg=40):
+        Transportation.__init__(self, name, speed)
+
+        self.mpg = mpg
+        self.fuel_gal = 0
+
+    def add_fuel(self, amount):
+        self.fuel_gal += amount
+
+    def drive(self, distance):
+        required_fuel = distance / self.mpg
+
+        if self.fuel_gal < required_fuel:
+            print("Not enough fuel")
+
+        else:
+            self.fuel_gal -= required_fuel
+            print(f"{self.fuel_gal} gallons remain")
+\end{lstlisting}
+
+\section{Explicitly Calling the Base Constructor}
+
+The line:
+
+\begin{lstlisting}[language=Python]
+Transportation.__init__(self, name, speed)
+\end{lstlisting}
+
+explicitly calls the constructor of the base class.
+
+This initializes the part of the object inherited from \texttt{Transportation}.
+
+This is extremely important: the derived class constructor does not automatically run the base class constructor unless we ask it to.
+
+\section{Derived Class: Motorcycle}
+
+A motorcycle is a specific kind of motorized vehicle.
+
+\begin{lstlisting}[language=Python]
+class Motorcycle(MotorizedVehicle):
+
+    def __init__(self, name, speed=55, mpg=25):
+        MotorizedVehicle.__init__(self, name, speed, mpg)
+
+    def wheelie(self):
+        print("That's dangerous!")
+\end{lstlisting}
+
+The \texttt{Motorcycle} class inherits:
+
+\begin{itemize}
+    \item \texttt{name},
+    \item \texttt{speed},
+    \item \texttt{mpg},
+    \item \texttt{fuel\_gal},
+    \item \texttt{info()},
+    \item \texttt{add\_fuel()},
+    \item \texttt{drive()}.
+\end{itemize}
+
+It also adds:
+
+\begin{lstlisting}[language=Python]
+wheelie()
+\end{lstlisting}
+
+\section{Using the Motorcycle Class}
+
+\begin{lstlisting}[language=Python]
+scooter = Motorcycle("Vespa", 55, 40)
+dirtbike = Motorcycle("KX450F", 80, 25)
+
+scooter.info()
+dirtbike.info()
+\end{lstlisting}
+
+We can also rely on default values:
+
+\begin{lstlisting}[language=Python]
+harley = Motorcycle("Harley Davidson")
+
+harley.info()
+print(harley.mpg)
+print(harley.fuel_gal)
+\end{lstlisting}
+
+The object \texttt{harley} is created using the default values from the \texttt{Motorcycle} constructor.
+
+\section{A Generic Motorized Vehicle}
+
+We can still instantiate the parent class directly:
+
+\begin{lstlisting}[language=Python]
+generic = MotorizedVehicle("People Carrier")
+
+generic.info()
+print(generic.mpg)
+print(generic.fuel_gal)
+\end{lstlisting}
+
+This is useful when the base or intermediate class is meaningful on its own.
+
+\section{Inheritance Chain}
+
+The inheritance chain in this example is:
+
+\[
+\texttt{Transportation}
+\rightarrow
+\texttt{MotorizedVehicle}
+\rightarrow
+\texttt{Motorcycle}
+\]
+
+Each derived class inherits everything from the classes above it, unless behavior is overridden or hidden.
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item A derived class inherits from a base class.
+    \item Default values make constructors more flexible.
+    \item Derived constructors should initialize the base part of the object.
+    \item In Python, this is often done explicitly with a base-class constructor call.
+    \item Inheritance allows us to reuse common code while adding specialized behavior.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,454 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Testing Code with Unit Tests and Timers}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+As programs become more complex, it becomes harder to know whether they are correct.
+
+It is also harder to know whether one algorithm is better than another.
+
+Two useful tools help with these questions:
+
+\begin{enumerate}
+    \item unit tests,
+    \item timing code.
+\end{enumerate}
+
+Unit tests help answer:
+
+\begin{quote}
+Does my program do what I think it does?
+\end{quote}
+
+Timers help answer:
+
+\begin{quote}
+How long does this algorithm take to run?
+\end{quote}
+
+Together, testing and timing are essential parts of serious software development.
+
+\section{Why Unit Tests Matter}
+
+Unit testing is not just something used by auto-graders.
+
+Unit tests are widely used in professional software development.
+
+A major use case is \textbf{continuous integration}, often abbreviated as CI.
+
+\section{Continuous Integration}
+
+Imagine a large project hosted on GitHub.
+
+Many people may contribute to the project.
+
+Each person may change one part of the code.
+
+The danger is that a change in one file may accidentally break another part of the project.
+
+Continuous integration systems help by automatically running tests whenever code is updated.
+
+\begin{quote}
+The purpose is to detect broken behavior quickly.
+\end{quote}
+
+\section{Object-Oriented Programming and Testing}
+
+Unit tests are especially important in object-oriented programming.
+
+If a class is used by many other parts of a program, then changing one method in that class can accidentally break code elsewhere.
+
+A good set of unit tests helps make sure that the class still behaves correctly after changes.
+
+\section{A Simple Example: Circle Class}
+
+Suppose we define a simple \texttt{Circle} class.
+
+\begin{lstlisting}[language=Python]
+class Circle:
+
+    def __init__(self, radius):
+        self.radius = radius
+
+    def compute_area(self):
+        return 3.14159265 * self.radius ** 2
+
+    def compute_circumference(self):
+        return 2.0 * 3.14159265 * self.radius
+\end{lstlisting}
+
+This class has:
+
+\begin{itemize}
+    \item a constructor,
+    \item a method to compute area,
+    \item a method to compute circumference.
+\end{itemize}
+
+\section{The \texttt{unittest} Module}
+
+Python includes a built-in testing module called:
+
+\begin{lstlisting}[language=Python]
+unittest
+\end{lstlisting}
+
+We import it using:
+
+\begin{lstlisting}[language=Python]
+import unittest
+\end{lstlisting}
+
+\section{Creating a Test Class}
+
+A test class should inherit from:
+
+\begin{lstlisting}[language=Python]
+unittest.TestCase
+\end{lstlisting}
+
+Example:
+
+\begin{lstlisting}[language=Python]
+class TestCircle(unittest.TestCase):
+    ...
+\end{lstlisting}
+
+This inheritance gives the test class access to useful testing methods such as:
+
+\begin{itemize}
+    \item \texttt{assertEqual()},
+    \item \texttt{assertLess()},
+    \item \texttt{assertGreater()},
+    \item \texttt{assertAlmostEqual()}.
+\end{itemize}
+
+\section{Writing a Test Method}
+
+Test methods are functions inside the test class.
+
+Important rule:
+
+\begin{quote}
+Test method names must begin with \texttt{test\_}.
+\end{quote}
+
+For example:
+
+\begin{lstlisting}[language=Python]
+def test_area(self):
+    ...
+\end{lstlisting}
+
+The \texttt{unittest} framework automatically finds and runs methods whose names begin with \texttt{test\_}.
+
+\section{Testing the Area}
+
+A first test checks that a circle of radius zero has area zero.
+
+\begin{lstlisting}[language=Python]
+def test_area(self):
+
+    c = Circle(0)
+
+    self.assertEqual(c.compute_area(), 0.0)
+\end{lstlisting}
+
+This test should pass.
+
+\section{Testing a Nonzero Area}
+
+For a circle of radius 5:
+
+\[
+A = \pi r^2
+\]
+
+so:
+
+\[
+A = \pi(5)^2 = 25\pi \approx 78.5398
+\]
+
+We can test this:
+
+\begin{lstlisting}[language=Python]
+def test_area(self):
+
+    c = Circle(0)
+    self.assertEqual(c.compute_area(), 0.0)
+
+    c = Circle(5)
+    self.assertAlmostEqual(c.compute_area(), 78.5398, places=4)
+\end{lstlisting}
+
+For floating point values, \texttt{assertAlmostEqual()} is often better than \texttt{assertEqual()}.
+
+\section{Testing for Bad Behavior}
+
+Sometimes tests are designed to check that something is \emph{not} true.
+
+For example, the area of a circle with positive radius should not be less than zero.
+
+\begin{lstlisting}[language=Python]
+def test_stupid(self):
+
+    c = Circle(5)
+
+    self.assertLess(c.compute_area(), 0.0)
+\end{lstlisting}
+
+This test is expected to fail.
+
+That is useful: it shows that the test framework is actually catching incorrect statements.
+
+\section{Running the Tests}
+
+At the bottom of the test file, we write:
+
+\begin{lstlisting}[language=Python]
+if __name__ == "__main__":
+    unittest.main()
+\end{lstlisting}
+
+This runs the tests when the file is executed directly.
+
+\section{Complete Unit Test Example}
+
+\begin{lstlisting}[language=Python]
+import unittest
+
+
+class Circle:
+
+    def __init__(self, radius):
+        self.radius = radius
+
+    def compute_area(self):
+        return 3.14159265 * self.radius ** 2
+
+    def compute_circumference(self):
+        return 2.0 * 3.14159265 * self.radius
+
+
+class TestCircle(unittest.TestCase):
+
+    def test_area(self):
+
+        c = Circle(0)
+        self.assertEqual(c.compute_area(), 0.0)
+
+        c = Circle(5)
+        self.assertAlmostEqual(c.compute_area(), 78.5398, places=4)
+
+    def test_stupid(self):
+
+        c = Circle(5)
+        self.assertLess(c.compute_area(), 0.0)
+
+
+if __name__ == "__main__":
+    unittest.main()
+\end{lstlisting}
+
+\section{Common Assert Methods}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Method & Checks That \\
+\midrule
+\texttt{assertEqual(a, b)} & \(a == b\) \\
+\texttt{assertNotEqual(a, b)} & \(a \neq b\) \\
+\texttt{assertTrue(x)} & \texttt{bool(x)} is \texttt{True} \\
+\texttt{assertFalse(x)} & \texttt{bool(x)} is \texttt{False} \\
+\texttt{assertIs(a, b)} & \(a\) is \(b\) \\
+\texttt{assertIsNot(a, b)} & \(a\) is not \(b\) \\
+\texttt{assertIsNone(x)} & \(x\) is \texttt{None} \\
+\texttt{assertIsNotNone(x)} & \(x\) is not \texttt{None} \\
+\texttt{assertIn(a, b)} & \(a\) in \(b\) \\
+\texttt{assertNotIn(a, b)} & \(a\) not in \(b\) \\
+\texttt{assertAlmostEqual(a, b)} & rounded difference is zero \\
+\texttt{assertGreater(a, b)} & \(a > b\) \\
+\texttt{assertGreaterEqual(a, b)} & \(a \ge b\) \\
+\texttt{assertLess(a, b)} & \(a < b\) \\
+\texttt{assertLessEqual(a, b)} & \(a \le b\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Timing Code}
+
+Once we have multiple possible algorithms, correctness is not the only question.
+
+We also care about performance.
+
+For example, if two algorithms both produce the correct answer, we may want to know which one is faster.
+
+\section{The \texttt{time} Module}
+
+Python includes a built-in module called:
+
+\begin{lstlisting}[language=Python]
+time
+\end{lstlisting}
+
+This module can be used directly, but it can feel cumbersome.
+
+A useful approach is to create a small wrapper class around the timing functionality.
+
+\section{The Timer Wrapper}
+
+Suppose we have a file called:
+
+\begin{lstlisting}
+timer.py
+\end{lstlisting}
+
+containing a \texttt{Timer} class.
+
+Then we can import it using:
+
+\begin{lstlisting}[language=Python]
+from timer import Timer
+\end{lstlisting}
+
+\section{Using the Timer}
+
+The basic pattern is:
+
+\begin{lstlisting}[language=Python]
+time1 = Timer()
+
+time1.start()
+
+# do things here
+
+elapsed_time1 = time1.stop()
+\end{lstlisting}
+
+The timer measures how much time passes between:
+
+\begin{lstlisting}[language=Python]
+start()
+\end{lstlisting}
+
+and:
+
+\begin{lstlisting}[language=Python]
+stop()
+\end{lstlisting}
+
+\section{Example: Timing a Loop}
+
+\begin{lstlisting}[language=Python]
+from timer import Timer
+
+timer = Timer()
+
+timer.start()
+
+total = 0
+
+for i in range(1000000):
+    total += i
+
+elapsed_time = timer.stop()
+
+print(f"Elapsed time: {elapsed_time}")
+\end{lstlisting}
+
+\section{Why Timing Matters}
+
+Timing code helps us compare algorithms in realistic situations.
+
+For example, suppose we have:
+
+\begin{itemize}
+    \item a recursive Fibonacci function,
+    \item an iterative Fibonacci function,
+    \item a formula-based Fibonacci function.
+\end{itemize}
+
+All three may produce the same answer for small \(n\), but their runtime behavior can be dramatically different.
+
+\section{Testing vs Timing}
+
+Testing and timing answer different questions.
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Tool & Main Question \\
+\midrule
+Unit tests & Is the code correct? \\
+Timers & How long does the code take? \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Both are important.
+
+Correct but very slow code may not be useful.
+
+Fast but incorrect code is also not useful.
+
+\section{Good Workflow}
+
+A good development workflow is:
+
+\begin{enumerate}
+    \item Write the code.
+    \item Write unit tests.
+    \item Run the tests.
+    \item Fix errors until the tests pass.
+    \item Time the code.
+    \item Compare alternative algorithms.
+    \item Choose an implementation based on correctness, clarity, and performance.
+\end{enumerate}
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item Unit tests check whether code behaves correctly.
+    \item Unit tests are important beyond auto-grading.
+    \item Continuous integration systems use tests to detect broken code automatically.
+    \item Test classes inherit from \texttt{unittest.TestCase}.
+    \item Test methods must begin with \texttt{test\_}.
+    \item \texttt{unittest.main()} runs the tests.
+    \item Timers measure algorithm performance.
+    \item Correctness and performance are different but complementary concerns.
+\end{itemize}
+
+\end{document}

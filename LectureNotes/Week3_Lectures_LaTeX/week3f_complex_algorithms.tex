@@ -1,0 +1,360 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Recursion, Binary Search, and Algorithm Efficiency}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Recursion}
+
+A recursive function is a function that calls itself.
+
+Recursion can be useful when problems naturally break into smaller versions of themselves.
+
+\section{A Bad Recursive Example}
+
+Consider:
+
+\begin{lstlisting}[language=Python]
+def count_down(count):
+
+    count_down(count - 1)
+\end{lstlisting}
+
+What happens if we call:
+
+\begin{lstlisting}[language=Python]
+count_down(3)
+\end{lstlisting}
+
+The function repeatedly calls itself forever:
+
+\[
+3 \rightarrow 2 \rightarrow 1 \rightarrow 0 \rightarrow -1 \rightarrow \cdots
+\]
+
+Eventually Python crashes with a recursion error.
+
+\section{The Importance of an End Condition}
+
+Recursive functions require an end condition.
+
+\begin{lstlisting}[language=Python]
+def count_down(count):
+
+    if count == 0:
+        print("Go!")
+
+    else:
+        print(count)
+        count_down(count - 1)
+\end{lstlisting}
+
+Now:
+
+\[
+count\_down(3)
+\]
+
+produces:
+
+\[
+3, 2, 1, Go!
+\]
+
+\section{Recursion vs Iteration}
+
+Although recursion can be elegant, it is often:
+
+\begin{itemize}
+    \item harder to understand,
+    \item harder to debug,
+    \item not more efficient.
+\end{itemize}
+
+One major exception is binary-search-style algorithms.
+
+\section{Binary Search Motivation}
+
+Suppose we want to find the root of a function:
+
+\[
+f(x) = 0
+\]
+
+Assume we know the root lies somewhere between:
+
+\[
+x_{low}
+\]
+
+and:
+
+\[
+x_{high}
+\]
+
+\section{Root Condition}
+
+A root exists between two points if:
+
+\[
+f(x_{low}) \cdot f(x_{high}) < 0
+\]
+
+This means the function changes sign.
+
+\section{The Binary Search Idea}
+
+Suppose the root lies between:
+
+\[
+a
+\]
+
+and:
+
+\[
+b
+\]
+
+We compute the midpoint:
+
+\[
+c = \frac{a+b}{2}
+\]
+
+Then determine which half contains the root.
+
+\section{Binary Search Algorithm}
+
+\begin{enumerate}
+    \item Compute midpoint:
+    \[
+    c = \frac{a+b}{2}
+    \]
+
+    \item Evaluate:
+    \[
+    f(a)f(c)
+    \]
+
+    \item If:
+    \[
+    f(a)f(c) < 0
+    \]
+    then the root lies between \(a\) and \(c\).
+
+    Otherwise it lies between \(c\) and \(b\).
+
+    \item Repeat.
+\end{enumerate}
+
+\section{Stopping Condition}
+
+The algorithm ends when the interval becomes sufficiently small:
+
+\[
+|b-a| < \epsilon
+\]
+
+where:
+
+\[
+\epsilon
+\]
+
+is a tiny number.
+
+\section{Example Function}
+
+\begin{lstlisting}[language=Python]
+def f(x):
+    return -4*x + 3
+\end{lstlisting}
+
+This function has a root at:
+
+\[
+x = 0.75
+\]
+
+\section{Starting Interval}
+
+\begin{lstlisting}[language=Python]
+a = 0.0
+b = 5.0
+\end{lstlisting}
+
+Check:
+
+\begin{lstlisting}[language=Python]
+f(a) * f(b)
+\end{lstlisting}
+
+If the product is negative, a root exists on the interval.
+
+\section{Recursive Binary Search Root Finder}
+
+\begin{lstlisting}[language=Python]
+def find_root(a, b):
+
+    epsilon = 1.0E-5
+
+    if abs(b - a) < epsilon:
+        print("Found root at x =", a)
+
+    else:
+
+        c = (a + b) / 2.0
+
+        if f(a) * f(c) < 0:
+            find_root(a, c)
+
+        else:
+            find_root(c, b)
+\end{lstlisting}
+
+\section{Searching Sorted Data}
+
+Binary search is also used to search sorted lists.
+
+Suppose we have alphabetically sorted names:
+
+\begin{center}
+Alice \\
+Charlie \\
+Dave \\
+Frieda \\
+Kallie \\
+Moe \\
+Paul \\
+Sarah \\
+Xavier
+\end{center}
+
+We repeatedly check the middle item and eliminate half of the remaining list.
+
+\section{Algorithm Efficiency}
+
+Algorithm efficiency describes how runtime scales with input size.
+
+This is usually expressed using Big-O notation.
+
+Common examples:
+
+\[
+O(n)
+\]
+
+\[
+O(n^2)
+\]
+
+\[
+O(\log n)
+\]
+
+\section{Linear Search}
+
+Searching a list one item at a time requires approximately:
+
+\[
+\frac{n}{2}
+\]
+
+checks on average.
+
+Complexity:
+
+\[
+O(n)
+\]
+
+\section{Binary Search Efficiency}
+
+Binary search repeatedly cuts the search space in half.
+
+If:
+
+\[
+n = 2^h
+\]
+
+then:
+
+\[
+h = \log_2(n)
+\]
+
+Therefore binary search complexity is:
+
+\[
+O(\log n)
+\]
+
+\section{Why Logarithmic Complexity Is Powerful}
+
+Suppose:
+
+\[
+n = 100,000,000
+\]
+
+A linear algorithm may require roughly:
+
+\[
+100,000,000
+\]
+
+operations.
+
+But binary search only requires approximately:
+
+\[
+\log_2(100,000,000) \approx 27
+\]
+
+steps.
+
+This is dramatically faster.
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item Recursive functions call themselves.
+    \item Recursive algorithms require stopping conditions.
+    \item Binary search repeatedly divides a problem in half.
+    \item Binary search is extremely efficient.
+    \item Big-O notation describes scaling behavior.
+    \item Logarithmic algorithms are vastly faster than linear algorithms for large datasets.
+\end{itemize}
+
+\end{document}

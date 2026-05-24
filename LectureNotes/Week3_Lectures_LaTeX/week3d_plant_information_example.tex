@@ -1,0 +1,300 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tikz}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Plant Information Example}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Program Goal}
+
+In this example, we use inheritance to build a small plant information program.
+
+We are given:
+
+\begin{itemize}
+    \item a base \texttt{Plant} class,
+    \item a derived \texttt{Flower} class.
+\end{itemize}
+
+We want to create a list called:
+
+\begin{lstlisting}[language=Python]
+my_garden
+\end{lstlisting}
+
+that stores both \texttt{Plant} and \texttt{Flower} objects.
+
+\section{The Base Plant Class}
+
+A plant has:
+
+\begin{itemize}
+    \item a name,
+    \item a cost.
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+class Plant:
+
+    def __init__(self, plant_name, plant_cost):
+        self.plant_name = plant_name
+        self.plant_cost = plant_cost
+
+    def print_info(self):
+        print(f"Plant name: {self.plant_name}")
+        print(f"Plant cost: {self.plant_cost}")
+\end{lstlisting}
+
+\section{The Derived Flower Class}
+
+A flower is a plant, but it has additional information:
+
+\begin{itemize}
+    \item whether it is annual,
+    \item flower color.
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+class Flower(Plant):
+
+    def __init__(self, plant_name, plant_cost,
+                 is_annual, color_of_flowers):
+
+        Plant.__init__(self, plant_name, plant_cost)
+
+        self.is_annual = is_annual
+        self.color_of_flowers = color_of_flowers
+
+    def print_info(self):
+        Plant.print_info(self)
+        print(f"Annual: {self.is_annual}")
+        print(f"Color of flowers: {self.color_of_flowers}")
+\end{lstlisting}
+
+\section{The Input Format}
+
+The program repeatedly reads user input until the user enters:
+
+\begin{lstlisting}
+-1
+\end{lstlisting}
+
+Each input line tells us whether the item is a plant or a flower.
+
+Examples:
+
+\begin{lstlisting}
+plant fern 12.99
+flower rose 15.99 true red
+-1
+\end{lstlisting}
+
+\section{Processing the Input}
+
+We split the user input into tokens:
+
+\begin{lstlisting}[language=Python]
+tokens = user_string.split()
+\end{lstlisting}
+
+Then:
+
+\begin{lstlisting}[language=Python]
+type = tokens[0]
+name = tokens[1]
+cost = tokens[2]
+\end{lstlisting}
+
+If the type is \texttt{plant}, we create a \texttt{Plant} object.
+
+If the type is \texttt{flower}, we create a \texttt{Flower} object.
+
+\section{Creating Objects}
+
+\begin{lstlisting}[language=Python]
+if type == "plant":
+
+    my_plant = Plant(name, cost)
+    my_garden.append(my_plant)
+
+elif type == "flower":
+
+    is_annual = tokens[3]
+    color = tokens[4]
+
+    my_flower = Flower(name, cost, is_annual, color)
+    my_garden.append(my_flower)
+\end{lstlisting}
+
+\section{The Main Loop}
+
+\begin{lstlisting}[language=Python]
+my_garden = []
+
+user_string = input()
+
+while user_string != "-1":
+
+    tokens = user_string.split()
+
+    type = tokens[0]
+    name = tokens[1]
+    cost = tokens[2]
+
+    if type == "plant":
+
+        my_plant = Plant(name, cost)
+        my_garden.append(my_plant)
+
+    elif type == "flower":
+
+        is_annual = tokens[3]
+        color = tokens[4]
+
+        my_flower = Flower(name, cost, is_annual, color)
+        my_garden.append(my_flower)
+
+    user_string = input()
+\end{lstlisting}
+
+\section{Printing the List}
+
+We write a function:
+
+\begin{lstlisting}[language=Python]
+def print_list(my_garden):
+\end{lstlisting}
+
+that loops over every object in the list and calls its \texttt{print\_info()} method.
+
+\begin{lstlisting}[language=Python]
+def print_list(my_garden):
+
+    for i in range(len(my_garden)):
+
+        print(f"Plant {i + 1} Information:")
+        my_garden[i].print_info()
+        print()
+\end{lstlisting}
+
+\section{Polymorphism}
+
+This example demonstrates polymorphism.
+
+The list contains both:
+
+\begin{itemize}
+    \item \texttt{Plant} objects,
+    \item \texttt{Flower} objects.
+\end{itemize}
+
+But the loop simply calls:
+
+\begin{lstlisting}[language=Python]
+my_garden[i].print_info()
+\end{lstlisting}
+
+Python automatically uses the correct version of \texttt{print\_info()} depending on the actual object type.
+
+\section{Complete Program}
+
+\begin{lstlisting}[language=Python]
+class Plant:
+
+    def __init__(self, plant_name, plant_cost):
+        self.plant_name = plant_name
+        self.plant_cost = plant_cost
+
+    def print_info(self):
+        print(f"Plant name: {self.plant_name}")
+        print(f"Plant cost: {self.plant_cost}")
+
+
+class Flower(Plant):
+
+    def __init__(self, plant_name, plant_cost,
+                 is_annual, color_of_flowers):
+
+        Plant.__init__(self, plant_name, plant_cost)
+
+        self.is_annual = is_annual
+        self.color_of_flowers = color_of_flowers
+
+    def print_info(self):
+        Plant.print_info(self)
+        print(f"Annual: {self.is_annual}")
+        print(f"Color of flowers: {self.color_of_flowers}")
+
+
+def print_list(my_garden):
+
+    for i in range(len(my_garden)):
+        print(f"Plant {i + 1} Information:")
+        my_garden[i].print_info()
+        print()
+
+
+my_garden = []
+
+user_string = input()
+
+while user_string != "-1":
+
+    tokens = user_string.split()
+
+    type = tokens[0]
+    name = tokens[1]
+    cost = tokens[2]
+
+    if type == "plant":
+        my_garden.append(Plant(name, cost))
+
+    elif type == "flower":
+        is_annual = tokens[3]
+        color = tokens[4]
+        my_garden.append(Flower(name, cost, is_annual, color))
+
+    user_string = input()
+
+print_list(my_garden)
+\end{lstlisting}
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item A derived class can extend a base class.
+    \item A derived class can override a method from the base class.
+    \item Lists can store objects of related types.
+    \item Polymorphism allows the same method call to behave differently depending on the object.
+    \item Input parsing often begins by splitting strings into tokens.
+\end{itemize}
+
+\end{document}
