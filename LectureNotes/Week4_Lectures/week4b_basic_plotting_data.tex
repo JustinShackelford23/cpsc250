@@ -1,0 +1,381 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Basic Plotting of Data}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+We have already seen examples where plotting data is useful.
+
+In this lecture, we develop a base plotting example using \texttt{matplotlib}.
+
+The goal is to create a plot with:
+
+\begin{enumerate}
+    \item a title,
+    \item axis labels,
+    \item data points with error bars,
+    \item a fit line,
+    \item a legend,
+    \item appropriate axis limits,
+    \item and possibly logarithmic axes or an error band.
+\end{enumerate}
+
+\section{Input Data Format}
+
+Suppose we have data stored in a CSV file.
+
+The file has columns:
+
+\[
+x,\quad y,\quad \Delta x,\quad \Delta y
+\]
+
+where:
+
+\begin{itemize}
+    \item \(x\) is the independent variable,
+    \item \(y\) is the dependent variable,
+    \item \(\Delta x\) is the uncertainty in \(x\),
+    \item \(\Delta y\) is the uncertainty in \(y\).
+\end{itemize}
+
+A schematic CSV file might look like:
+
+\begin{lstlisting}
+XLabel,YLabel,dXLabel,dYLabel
+1.0,3.0,0.01,0.03
+2.0,3.2,0.02,0.02
+...
+\end{lstlisting}
+
+\section{What We Want to Plot}
+
+A good data plot should show:
+
+\begin{itemize}
+    \item the data points,
+    \item both x and y error bars,
+    \item the best-fit curve,
+    \item a legend describing the data and fit,
+    \item the x-axis label,
+    \item the y-axis label,
+    \item a title.
+\end{itemize}
+
+\section{Reading the Data}
+
+We can use Python's \texttt{csv} module to read the data.
+
+\begin{lstlisting}[language=Python]
+import csv
+
+def read_data(filename):
+
+    x = []
+    y = []
+    dx = []
+    dy = []
+
+    with open(filename, "r") as file:
+
+        reader = csv.reader(file)
+
+        headers = next(reader, None)
+
+        for row in reader:
+
+            x.append(float(row[0]))
+            y.append(float(row[1]))
+            dx.append(float(row[2]))
+            dy.append(float(row[3]))
+
+    return headers, x, y, dx, dy
+\end{lstlisting}
+
+\section{The Header Row}
+
+The line:
+
+\begin{lstlisting}[language=Python]
+headers = next(reader, None)
+\end{lstlisting}
+
+reads the first row of the file.
+
+This row contains labels rather than data.
+
+For example:
+
+\begin{lstlisting}
+XLabel,YLabel,dXLabel,dYLabel
+\end{lstlisting}
+
+We can use these labels later for axis labels.
+
+\section{Creating the Basic Plot}
+
+We import:
+
+\begin{lstlisting}[language=Python]
+import matplotlib.pyplot as plt
+\end{lstlisting}
+
+Then:
+
+\begin{lstlisting}[language=Python]
+filename = "testdata.csv"
+
+headers, xi, yi, dxi, dyi = read_data(filename)
+
+plt.errorbar(xi, yi, xerr=dxi, yerr=dyi, fmt="o")
+
+plt.title("Basic Plotting Example")
+plt.xlabel(headers[0])
+plt.ylabel(headers[1])
+
+plt.show()
+\end{lstlisting}
+
+\section{The \texttt{errorbar()} Function}
+
+The function:
+
+\begin{lstlisting}[language=Python]
+plt.errorbar()
+\end{lstlisting}
+
+plots points with error bars.
+
+In this example:
+
+\begin{lstlisting}[language=Python]
+plt.errorbar(xi, yi, xerr=dxi, yerr=dyi, fmt="o")
+\end{lstlisting}
+
+means:
+
+\begin{itemize}
+    \item use \texttt{xi} as x-values,
+    \item use \texttt{yi} as y-values,
+    \item use \texttt{dxi} as x uncertainties,
+    \item use \texttt{dyi} as y uncertainties,
+    \item use circular markers.
+\end{itemize}
+
+\section{Axis Limits}
+
+Matplotlib will choose default axis limits automatically.
+
+However, sometimes we should set the limits ourselves.
+
+For example:
+
+\begin{lstlisting}[language=Python]
+plt.ylim(0, 0)
+\end{lstlisting}
+
+is a special case: Python interprets this as a request to choose the upper limit automatically while forcing the lower limit to zero.
+
+This can be useful when the physical quantity cannot be negative.
+
+\section{Which Plot Requirements Are Already Satisfied?}
+
+At this stage, we have:
+
+\begin{itemize}
+    \item a title,
+    \item x-axis label,
+    \item y-axis label,
+    \item data points with x and y error bars,
+    \item appropriate automatic axis behavior.
+\end{itemize}
+
+We have not yet added:
+
+\begin{itemize}
+    \item a fit curve,
+    \item a legend,
+    \item logarithmic axes,
+    \item an error band.
+\end{itemize}
+
+\section{Fitting}
+
+Fitting is a very large topic.
+
+In this course, we use a simple practical approach.
+
+The steps are:
+
+\begin{enumerate}
+    \item Choose a fitting function.
+    \item Call a fitting routine.
+    \item Extract the best-fit parameters.
+    \item Plot the fit.
+\end{enumerate}
+
+\section{Choosing a Fit Function}
+
+Suppose the data appear roughly quadratic.
+
+Then we might choose:
+
+\[
+y = ax^2 + bx + c
+\]
+
+In Python:
+
+\begin{lstlisting}[language=Python]
+def fitfunction(x, *param):
+
+    return param[0]*x*x + param[1]*x + param[2]
+\end{lstlisting}
+
+The star in:
+
+\begin{lstlisting}[language=Python]
+*param
+\end{lstlisting}
+
+allows the function to accept a variable number of parameters.
+
+Here:
+
+\begin{itemize}
+    \item \texttt{param[0]} is \(a\),
+    \item \texttt{param[1]} is \(b\),
+    \item \texttt{param[2]} is \(c\).
+\end{itemize}
+
+\section{Calling \texttt{curve\_fit}}
+
+We import:
+
+\begin{lstlisting}[language=Python]
+from scipy.optimize import curve_fit
+\end{lstlisting}
+
+Then we call:
+
+\begin{lstlisting}[language=Python]
+init_vals = [0.0 for x in range(3)]
+
+popt, pcov = curve_fit(
+    fitfunction,
+    xi,
+    yi,
+    p0=init_vals,
+    sigma=dyi,
+    absolute_sigma=True
+)
+\end{lstlisting}
+
+Here:
+
+\begin{itemize}
+    \item \texttt{popt} contains the optimal fit parameters,
+    \item \texttt{pcov} contains the covariance matrix.
+\end{itemize}
+
+\section{Parameter Uncertainties}
+
+The uncertainties in the fitted parameters come from the diagonal of the covariance matrix:
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+perr = np.sqrt(np.diag(pcov))
+\end{lstlisting}
+
+Then:
+
+\begin{lstlisting}[language=Python]
+a = popt[0]
+b = popt[1]
+c = popt[2]
+
+da = perr[0]
+db = perr[1]
+dc = perr[2]
+\end{lstlisting}
+
+This gives:
+
+\[
+a \pm \Delta a
+\]
+
+\[
+b \pm \Delta b
+\]
+
+\[
+c \pm \Delta c
+\]
+
+\section{Plotting the Fit}
+
+To plot a smooth curve, create many x-values:
+
+\begin{lstlisting}[language=Python]
+xlow = min(xi) - 2
+xhigh = max(xi) + 2
+
+xfit = np.linspace(xlow, xhigh, 100)
+yfit = fitfunction(xfit, *popt)
+
+plt.plot(xfit, yfit, "--")
+\end{lstlisting}
+
+The line:
+
+\begin{lstlisting}[language=Python]
+fitfunction(xfit, *popt)
+\end{lstlisting}
+
+evaluates the fit function using the fitted parameters.
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item CSV files are useful for storing data.
+    \item A good plot includes labels, a title, and a legend.
+    \item Error bars communicate measurement uncertainty.
+    \item \texttt{plt.errorbar()} plots data with uncertainties.
+    \item \texttt{curve\_fit()} performs numerical fitting.
+    \item The covariance matrix provides parameter uncertainties.
+    \item Smooth fit curves are created using many x-values.
+\end{itemize}
+
+\end{document}

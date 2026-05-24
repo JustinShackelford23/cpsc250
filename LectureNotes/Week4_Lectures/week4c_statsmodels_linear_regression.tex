@@ -1,0 +1,269 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Simple Linear Regression with StatsModels}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+Previously, we used \texttt{scipy.optimize.curve\_fit()} for fitting data.
+
+In this lecture, we introduce a different approach using:
+
+\begin{itemize}
+    \item \texttt{pandas}
+    \item \texttt{statsmodels}
+\end{itemize}
+
+The goals are:
+
+\begin{enumerate}
+    \item obtain parameter uncertainties automatically,
+    \item use a cleaner data structure,
+    \item simplify regression workflows.
+\end{enumerate}
+
+\section{Why Pandas?}
+
+A \texttt{pandas DataFrame} is similar to a spreadsheet.
+
+Each column has a label and stores related data.
+
+This is often easier to work with than raw NumPy matrices.
+
+\section{Creating a DataFrame}
+
+We first import pandas:
+
+\begin{lstlisting}[language=Python]
+import pandas as pd
+\end{lstlisting}
+
+Then create a DataFrame:
+
+\begin{lstlisting}[language=Python]
+df = pd.DataFrame({
+
+    "x": [5, 10, 15, 20],
+    "y": [5, 12, 20, 27]
+
+})
+\end{lstlisting}
+
+The keys:
+
+\begin{lstlisting}[language=Python]
+"x"
+"y"
+\end{lstlisting}
+
+become the column labels.
+
+\section{Accessing Columns}
+
+We can print the entire table:
+
+\begin{lstlisting}[language=Python]
+print(df)
+\end{lstlisting}
+
+Or access a specific column:
+
+\begin{lstlisting}[language=Python]
+print(df["x"])
+\end{lstlisting}
+
+This returns only the x-values.
+
+\section{Preparing for Linear Regression}
+
+Suppose we want a linear model:
+
+\[
+y = \beta_0 + \beta_1 x
+\]
+
+where:
+
+\begin{itemize}
+    \item \(\beta_0\) is the intercept,
+    \item \(\beta_1\) is the slope.
+\end{itemize}
+
+\section{Importing StatsModels}
+
+We typically import:
+
+\begin{lstlisting}[language=Python]
+import statsmodels.api as sm
+\end{lstlisting}
+
+\section{Extracting the Data}
+
+We extract columns from the DataFrame:
+
+\begin{lstlisting}[language=Python]
+y = df["y"]
+X = df["x"]
+\end{lstlisting}
+
+Notice:
+
+\begin{itemize}
+    \item uppercase \(X\) is used for independent variables,
+    \item lowercase \(y\) is used for dependent variables.
+\end{itemize}
+
+\section{Adding a Constant Term}
+
+We now call:
+
+\begin{lstlisting}[language=Python]
+X = sm.add_constant(X)
+\end{lstlisting}
+
+This adds a column of ones.
+
+Why?
+
+Because the model:
+
+\[
+y = \beta_0 + \beta_1 x
+\]
+
+contains a constant term.
+
+Without this step, the fit would assume:
+
+\[
+y = \beta_1 x
+\]
+
+which forces the line through the origin.
+
+\section{Creating the Model}
+
+We construct the model using Ordinary Least Squares (OLS):
+
+\begin{lstlisting}[language=Python]
+model = sm.OLS(y, X).fit()
+\end{lstlisting}
+
+Important:
+
+\begin{itemize}
+    \item the dependent variable \(y\) comes first,
+    \item the independent-variable matrix \(X\) comes second.
+\end{itemize}
+
+\section{What is OLS?}
+
+OLS stands for:
+
+\[
+\text{Ordinary Least Squares}
+\]
+
+This is the standard linear-regression technique.
+
+The idea is to choose parameters that minimize:
+
+\[
+\sum_i (y_i - y_{\mathrm{fit},i})^2
+\]
+
+the sum of squared residuals.
+
+\section{Viewing the Results}
+
+The most useful step is:
+
+\begin{lstlisting}[language=Python]
+print(model.summary())
+\end{lstlisting}
+
+This produces a detailed statistical summary including:
+
+\begin{itemize}
+    \item best-fit parameters,
+    \item uncertainties,
+    \item confidence intervals,
+    \item goodness-of-fit measures,
+    \item statistical tests.
+\end{itemize}
+
+\section{Advantages of StatsModels}
+
+Compared with simpler fitting approaches, \texttt{statsmodels} provides:
+
+\begin{itemize}
+    \item cleaner statistical output,
+    \item automatic uncertainty calculations,
+    \item convenient regression tools,
+    \item integration with pandas.
+\end{itemize}
+
+\section{Complete Example}
+
+\begin{lstlisting}[language=Python]
+import pandas as pd
+import statsmodels.api as sm
+
+df = pd.DataFrame({
+
+    "x": [5, 10, 15, 20],
+    "y": [5, 12, 20, 27]
+
+})
+
+y = df["y"]
+
+X = df["x"]
+
+X = sm.add_constant(X)
+
+model = sm.OLS(y, X).fit()
+
+print(model.summary())
+\end{lstlisting}
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item Pandas DataFrames organize data using labeled columns.
+    \item StatsModels provides advanced regression tools.
+    \item \texttt{sm.add\_constant()} adds the intercept term.
+    \item OLS performs standard least-squares regression.
+    \item \texttt{model.summary()} gives detailed statistical information.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,345 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Advanced Linear Regression Concepts}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+In earlier lectures, we considered simple linear regression involving one independent variable.
+
+Real-world data analysis is often more complicated.
+
+In this lecture, we discuss:
+
+\begin{itemize}
+    \item multiple regression variables,
+    \item parameter interpretation,
+    \item correlations between variables,
+    \item matrix representations,
+    \item and data structures for regression.
+\end{itemize}
+
+\section{Complex Regression Problems}
+
+Suppose we want to predict:
+
+\[
+y
+\]
+
+using several variables:
+
+\[
+x_1, x_2, x_3, x_4
+\]
+
+For example:
+
+\begin{itemize}
+    \item \(y\): housing price,
+    \item \(x_1\): square footage,
+    \item \(x_2\): zip code,
+    \item \(x_3\): number of bedrooms,
+    \item \(x_4\): number of bathrooms.
+\end{itemize}
+
+\section{The Regression Equation}
+
+We seek an equation of the form:
+
+\[
+y =
+\beta_0
++
+\beta_1 x_1
++
+\beta_2 x_2
++
+\beta_3 x_3
++
+\beta_4 x_4
+\]
+
+This is linear in the parameters.
+
+\section{Why This Is Difficult}
+
+Visualizing this problem directly would require a very high-dimensional plot.
+
+For example:
+
+\begin{itemize}
+    \item one dependent variable,
+    \item four independent variables.
+\end{itemize}
+
+This is impossible to visualize completely.
+
+Therefore, regression becomes both:
+
+\begin{itemize}
+    \item a computational problem,
+    \item and an interpretation problem.
+\end{itemize}
+
+\section{Parameter Uncertainties}
+
+In practice, we determine:
+
+\[
+\beta_0 \pm \Delta\beta_0
+\]
+
+\[
+\beta_1 \pm \Delta\beta_1
+\]
+
+and so on.
+
+A parameter consistent with zero may indicate that the corresponding variable is not important.
+
+For example:
+
+\begin{quote}
+If the coefficient for number of bedrooms is consistent with zero, housing prices may not strongly depend on that variable.
+\end{quote}
+
+\section{Exploratory Data Analysis}
+
+Before fitting, we should first examine the data.
+
+For example:
+
+\[
+y \text{ vs. } x_1
+\]
+
+\[
+y \text{ vs. } x_2
+\]
+
+and so on.
+
+This helps identify:
+
+\begin{itemize}
+    \item trends,
+    \item bad data,
+    \item outliers,
+    \item nonlinear behavior.
+\end{itemize}
+
+\section{Correlations Between Variables}
+
+Independent variables may themselves be correlated.
+
+For example:
+
+\[
+x_2 \text{ vs. } x_3
+\]
+
+might show a strong trend.
+
+This can produce misleading results.
+
+\section{Correlation vs. Causation}
+
+An important warning:
+
+\begin{quote}
+Correlation does not imply causation.
+\end{quote}
+
+Two variables may move together without one causing the other.
+
+Regression analysis must therefore be interpreted carefully.
+
+\section{Data Structures for Regression}
+
+There are two common choices:
+
+\begin{enumerate}
+    \item NumPy arrays,
+    \item pandas DataFrames.
+\end{enumerate}
+
+\section{Matrix Interpretation}
+
+Suppose:
+
+\[
+y =
+\beta_0
++
+\beta_1 x_1
++
+\beta_2 x_2
+\]
+
+for many data points.
+
+We can write:
+
+\[
+y_1 =
+\beta_0
++
+\beta_1 x_{11}
++
+\beta_2 x_{21}
+\]
+
+\[
+y_2 =
+\beta_0
++
+\beta_1 x_{12}
++
+\beta_2 x_{22}
+\]
+
+and so on.
+
+\section{Matrix Form}
+
+These equations can be rewritten as:
+
+\[
+\mathbf{y}
+=
+X
+\mathbf{\beta}
+\]
+
+where:
+
+\begin{itemize}
+    \item \(\mathbf{y}\) is the vector of dependent values,
+    \item \(X\) is the design matrix,
+    \item \(\mathbf{\beta}\) is the parameter vector.
+\end{itemize}
+
+\section{Linear Algebra Perspective}
+
+In principle:
+
+\[
+\mathbf{\beta}
+=
+(X^T X)^{-1} X^T \mathbf{y}
+\]
+
+This is the mathematical foundation of many regression algorithms.
+
+\section{Important Practical Point}
+
+For most Python regression tools:
+
+\begin{itemize}
+    \item \(X\)-data should be a two-dimensional matrix,
+    \item \(y\)-data should be a one-dimensional array.
+\end{itemize}
+
+\section{Simple NumPy Example}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+xi = [1, 2, 3, 4, 5]
+
+yi = [1.1, 2.1, 2.9, 3.9, 5.1]
+
+X = np.array(xi).reshape((-1,1))
+
+y = np.array(yi)
+\end{lstlisting}
+
+\section{Why Reshape?}
+
+The line:
+
+\begin{lstlisting}[language=Python]
+reshape((-1,1))
+\end{lstlisting}
+
+converts the array into a column matrix.
+
+This is required because regression libraries expect:
+
+\[
+N \times M
+\]
+
+data structures for independent variables.
+
+\section{Printing NumPy Arrays}
+
+NumPy arrays display differently from Python lists.
+
+For example:
+
+\begin{lstlisting}[language=Python]
+print(y)
+\end{lstlisting}
+
+may display:
+
+\begin{lstlisting}
+[1.1 2.1 2.9 3.9 5.1]
+\end{lstlisting}
+
+without commas.
+
+\section{Data Cleaning}
+
+Before fitting, we should:
+
+\begin{itemize}
+    \item plot the data,
+    \item look for missing points,
+    \item identify outliers,
+    \item think about appropriate models.
+\end{itemize}
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item Real regression problems often involve many variables.
+    \item Regression coefficients have uncertainties.
+    \item Correlations between variables can complicate interpretation.
+    \item Regression is fundamentally a linear-algebra problem.
+    \item Most regression libraries require two-dimensional \(X\)-data.
+    \item Exploratory plotting is extremely important before fitting.
+\end{itemize}
+
+\end{document}

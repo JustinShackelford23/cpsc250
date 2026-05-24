@@ -1,0 +1,439 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ More on Fibonacci and Complex Numbers}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+The Fibonacci sequence is surprisingly rich.
+
+Previously, we introduced the sequence and discussed several algorithms for computing it.
+
+In this lecture, we return to Fibonacci from a more mathematical point of view.
+
+This gives us a chance to discuss:
+
+\begin{itemize}
+    \item alternate indexing conventions,
+    \item negative Fibonacci numbers,
+    \item Binet's formula,
+    \item non-integer inputs,
+    \item complex numbers in Python,
+    \item and plotting mathematically interesting functions.
+\end{itemize}
+
+\section{The Common Fibonacci Convention}
+
+A common version of the Fibonacci sequence begins:
+
+\[
+1, 1, 2, 3, 5, 8, 13, \ldots
+\]
+
+with:
+
+\[
+f_1 = 1
+\]
+
+\[
+f_2 = 1
+\]
+
+and:
+
+\[
+f_n = f_{n-1} + f_{n-2}
+\]
+
+for:
+
+\[
+n \ge 3
+\]
+
+This convention uses natural-number indexing.
+
+\section{The Zero-Indexed Convention}
+
+Earlier, we used a slightly different convention:
+
+\[
+0, 1, 1, 2, 3, 5, 8, \ldots
+\]
+
+with:
+
+\[
+f_0 = 0
+\]
+
+\[
+f_1 = 1
+\]
+
+and:
+
+\[
+f_n = f_{n-1} + f_{n-2}
+\]
+
+for:
+
+\[
+n \ge 2
+\]
+
+This convention is common in programming because indexing often begins at zero.
+
+\section{Extending Fibonacci Backward}
+
+A natural question is:
+
+\begin{quote}
+Can we extend the Fibonacci sequence to negative indices?
+\end{quote}
+
+The answer is yes.
+
+Using the recurrence:
+
+\[
+f_n = f_{n-1} + f_{n-2}
+\]
+
+we can solve backward.
+
+Since:
+
+\[
+f_1 = f_0 + f_{-1}
+\]
+
+and:
+
+\[
+1 = 0 + f_{-1}
+\]
+
+we obtain:
+
+\[
+f_{-1} = 1
+\]
+
+Next:
+
+\[
+f_0 = f_{-1} + f_{-2}
+\]
+
+so:
+
+\[
+0 = 1 + f_{-2}
+\]
+
+and therefore:
+
+\[
+f_{-2} = -1
+\]
+
+Continuing gives:
+
+\[
+\ldots, 89, -55, 34, -21, 13, -8, 5, -3, 2, -1, 1, 0, 1, 1, 2, 3, 5, \ldots
+\]
+
+The signs alternate for negative indices.
+
+\section{Ratio Behavior}
+
+For positive indices, the ratio:
+
+\[
+\frac{f_{n+1}}{f_n}
+\]
+
+approaches:
+
+\[
+\phi = \frac{1+\sqrt{5}}{2}
+\]
+
+as:
+
+\[
+n \rightarrow +\infty
+\]
+
+For negative indices, a related limiting behavior occurs:
+
+\[
+\frac{f_{n+1}}{f_n}
+\rightarrow
+-\frac{1}{\phi}
+\]
+
+as:
+
+\[
+n \rightarrow -\infty
+\]
+
+Thus, the golden ratio appears on the positive side, while its negative reciprocal appears on the negative side.
+
+\section{Binet's Formula}
+
+Binet's formula is:
+
+\[
+f_n =
+\frac{
+\phi^n -
+\left(-\frac{1}{\phi}\right)^n
+}{
+\sqrt{5}
+}
+\]
+
+This formula works beautifully for integer values of \(n\), including negative integers.
+
+\section{A Strange Question}
+
+Once we have a formula, we can ask a strange but interesting question:
+
+\begin{quote}
+What happens if \(n\) is not an integer?
+\end{quote}
+
+For example:
+
+\[
+f_{0.5}
+\]
+
+Using Binet's formula:
+
+\[
+f_{0.5}
+=
+\frac{
+\phi^{0.5}
+-
+\left(-\frac{1}{\phi}\right)^{0.5}
+}{
+\sqrt{5}
+}
+\]
+
+But:
+
+\[
+a^{0.5} = \sqrt{a}
+\]
+
+so this requires:
+
+\[
+\sqrt{-\frac{1}{\phi}}
+\]
+
+which is the square root of a negative number.
+
+This leads naturally to complex numbers.
+
+\section{Complex Numbers}
+
+The imaginary unit is defined by:
+
+\[
+i = \sqrt{-1}
+\]
+
+A complex number has the form:
+
+\[
+z = a + ib
+\]
+
+where:
+
+\begin{itemize}
+    \item \(a\) is the real part,
+    \item \(b\) is the imaginary part.
+\end{itemize}
+
+The magnitude of a complex number is:
+
+\[
+|z| = \sqrt{a^2 + b^2}
+\]
+
+\section{Complex Numbers in Python}
+
+Python uses:
+
+\[
+j
+\]
+
+instead of \(i\) for the imaginary unit.
+
+This is common in engineering.
+
+Example:
+
+\begin{lstlisting}[language=Python]
+import cmath
+
+a = 4
+b = 3
+
+z = complex(a, b)
+
+print(f"The real part of z is {z.real}")
+print(f"The imaginary part of z is {z.imag}")
+\end{lstlisting}
+
+This creates:
+
+\[
+z = 4 + 3j
+\]
+
+\section{Polar Form}
+
+The module \texttt{cmath} can convert a complex number to polar form.
+
+\begin{lstlisting}[language=Python]
+w = cmath.polar(z)
+
+print(f"The size and phase of z are {w}")
+\end{lstlisting}
+
+The result contains:
+
+\begin{itemize}
+    \item magnitude,
+    \item phase angle.
+\end{itemize}
+
+The phase angle is given in radians.
+
+\section{Converting Back to Rectangular Form}
+
+We can also convert from polar form back to rectangular form:
+
+\begin{lstlisting}[language=Python]
+z3 = cmath.rect(w[0], w[1])
+
+print(z3)
+\end{lstlisting}
+
+\section{Plotting Fibonacci for Real Values}
+
+Now we are ready to ask Python to evaluate Binet's formula for many real values of \(n\), not just integers.
+
+The goal is to make a plot of:
+
+\[
+f_n
+\]
+
+versus:
+
+\[
+n
+\]
+
+for real values of \(n\) between, for example:
+
+\[
+-30 \le n \le 30
+\]
+
+\section{Important Practical Note}
+
+For non-integer values of \(n\), Binet's formula may produce complex values.
+
+Therefore, we may need to plot:
+
+\begin{itemize}
+    \item the real part,
+    \item the imaginary part,
+    \item or both.
+\end{itemize}
+
+\section{Plotting Plan}
+
+A reasonable plan is:
+
+\begin{enumerate}
+    \item Define the Fibonacci function using Binet's formula.
+    \item Generate a list or array of \(n\)-values.
+    \item Compute the corresponding Fibonacci values.
+    \item Plot the normal integer Fibonacci values as distinct points.
+    \item Plot the real and imaginary parts for real-valued input.
+    \item Draw the horizontal and vertical axes.
+\end{enumerate}
+
+\section{Matplotlib Axis Lines}
+
+Matplotlib provides:
+
+\begin{lstlisting}[language=Python]
+plt.axvline(x=0)
+plt.axhline(y=0)
+\end{lstlisting}
+
+These draw:
+
+\begin{itemize}
+    \item a vertical line at \(x=0\),
+    \item a horizontal line at \(y=0\).
+\end{itemize}
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item Fibonacci numbers can be indexed in more than one way.
+    \item The sequence can be extended to negative indices.
+    \item Negative-index Fibonacci numbers alternate signs.
+    \item Binet's formula works for integer indices.
+    \item Extending the formula to non-integer inputs naturally introduces complex numbers.
+    \item Python supports complex numbers directly.
+    \item The \texttt{cmath} module provides tools for complex arithmetic.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,243 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ Plotting Error Bands}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+When we fit a curve to data, the fit parameters have uncertainties.
+
+A natural question is:
+
+\begin{quote}
+How do uncertainties in the fit parameters translate into uncertainties in the fit itself?
+\end{quote}
+
+The full statistical treatment is complicated.
+
+However, we can create a useful visualization called an \textbf{error band}.
+
+\section{The Basic Idea}
+
+Suppose our fit parameters are stored in:
+
+\begin{itemize}
+    \item \texttt{popt} --- optimal fit parameters,
+    \item \texttt{pcov} --- covariance matrix.
+\end{itemize}
+
+The covariance matrix describes the uncertainties and correlations of the parameters.
+
+We can use this information to generate many random possible fits.
+
+\section{Monte Carlo Sampling}
+
+The key idea is:
+
+\begin{enumerate}
+    \item randomly generate many possible parameter sets,
+    \item compute a fit curve for each parameter set,
+    \item examine the spread of the curves.
+\end{enumerate}
+
+\section{Generating Random Parameter Sets}
+
+We use:
+
+\begin{lstlisting}[language=Python]
+ps = np.random.multivariate_normal(
+    popt,
+    pcov,
+    10000
+)
+\end{lstlisting}
+
+This generates:
+
+\begin{itemize}
+    \item 10,000 random parameter sets,
+    \item sampled from a multivariate Gaussian distribution,
+    \item centered on the best-fit parameters.
+\end{itemize}
+
+\section{Why a Multivariate Distribution?}
+
+Fit parameters are often correlated.
+
+For example:
+
+\begin{itemize}
+    \item increasing one parameter,
+    \item while decreasing another,
+\end{itemize}
+
+might produce similarly good fits.
+
+The covariance matrix captures these correlations.
+
+\section{Generating Many Curves}
+
+Next:
+
+\begin{lstlisting}[language=Python]
+ysample = np.asarray(
+
+    [
+
+        fitfunction(xfit, *pi)
+
+        for pi in ps
+
+    ]
+
+)
+\end{lstlisting}
+
+This creates:
+
+\begin{itemize}
+    \item 10,000 fitted curves,
+    \item one for each sampled parameter set.
+\end{itemize}
+
+\section{Understanding the Shape of \texttt{ysample}}
+
+The array:
+
+\begin{lstlisting}[language=Python]
+ysample
+\end{lstlisting}
+
+contains many different possible y-values for each x-position.
+
+Each row corresponds to a different sampled fit.
+
+\section{Constructing the Error Band}
+
+We now compute percentiles.
+
+Upper boundary:
+
+\begin{lstlisting}[language=Python]
+upper = np.percentile(
+    ysample,
+    84.0,
+    axis=0
+)
+\end{lstlisting}
+
+Lower boundary:
+
+\begin{lstlisting}[language=Python]
+lower = np.percentile(
+    ysample,
+    16.0,
+    axis=0
+)
+\end{lstlisting}
+
+\section{Why 16\% and 84\%?}
+
+For a Gaussian distribution:
+
+\begin{itemize}
+    \item about 68\% of values lie within one standard deviation,
+    \item leaving roughly 16\% in each tail.
+\end{itemize}
+
+Therefore:
+
+\begin{itemize}
+    \item the 16th percentile corresponds approximately to \(-1\sigma\),
+    \item the 84th percentile corresponds approximately to \(+1\sigma\).
+\end{itemize}
+
+\section{Plotting the Band}
+
+We can shade the region between the boundaries:
+
+\begin{lstlisting}[language=Python]
+plt.fill_between(
+    xfit,
+    lower,
+    upper,
+    alpha=0.3
+)
+\end{lstlisting}
+
+This creates a shaded uncertainty region around the fit.
+
+\section{Interpretation}
+
+The error band gives a visual estimate of:
+
+\begin{itemize}
+    \item how uncertain the fit is,
+    \item where predictions are more reliable,
+    \item where uncertainties become large.
+\end{itemize}
+
+\section{Important Note}
+
+This procedure assumes:
+
+\begin{itemize}
+    \item approximately Gaussian parameter uncertainties,
+    \item a reasonable covariance matrix,
+    \item a good fit model.
+\end{itemize}
+
+In professional data analysis, uncertainty estimation can become much more sophisticated.
+
+\section{Complete Workflow}
+
+Typical steps:
+
+\begin{enumerate}
+    \item Fit the data.
+    \item Obtain \texttt{popt} and \texttt{pcov}.
+    \item Generate many random parameter sets.
+    \item Compute many fitted curves.
+    \item Determine percentile boundaries.
+    \item Plot the shaded region.
+\end{enumerate}
+
+\section{Key Takeaways}
+
+\begin{itemize}
+    \item Fit parameters have uncertainties.
+    \item The covariance matrix describes parameter uncertainty and correlation.
+    \item Monte Carlo sampling can propagate uncertainties into the fitted curve.
+    \item Error bands provide a useful visualization of fit uncertainty.
+\end{itemize}
+
+\end{document}
