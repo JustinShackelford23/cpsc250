@@ -82,4 +82,10 @@ print(toppings)  # sort in reverse alphabetical order
 toppings.sort(reverse=True, key=lambda x: len(x))
 print(toppings)  # sort by length of the word, largest to smallest
 
+s = sum(range(1,11))
+print(s)
+
+s = int((range(1,11)[-1]+1)*len(range(1,11))/2)
+print(s)
+
 

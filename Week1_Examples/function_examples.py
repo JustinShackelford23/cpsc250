@@ -49,5 +49,28 @@ def change_numbers(list_of_numbers):
     list_of_numbers[0] = 7
     return
 
+def math_stuff(a,b):
+    c = a + b
+    d = a - b
+    m = a*b
+    if b!=0:
+        div = a/b
+    else:
+        div = "undefined"
+
+    return c, d, m, div
+
 change_numbers(numbers)
 print(numbers)
+
+p = 7
+q = 42
+x,y,z,t = math_stuff(p,q)
+
+print(p)
+print(q)
+print(x)
+print(y)
+print(z)
+print(t)
+
