@@ -109,7 +109,7 @@ elif choice == 1:
     # plot the credit profile for situations where there were
     # a large number of rounds (>8000)
     for j in range(len(result_number)):
-        if len(result_number[j]) > 11500:
+        if len(result_number[j]) > 1000:
             plt.plot(result_number[j], credit_result[j])
     plt.title("Lucky 7 Simulations: Sample Credit Profiles")
     plt.xlabel("Round Number")
