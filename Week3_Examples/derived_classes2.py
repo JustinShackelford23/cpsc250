@@ -24,6 +24,9 @@ class MotorVehicle(TransportMode):
             self.fuel_gal -= required_fuel
             print(f'{self.fuel_gal:f} gallons remaining.')
 
+    def info(self):
+        print(f'{self.name} can go {self.speed} mph and has a fuel economy of {self.mpg} mpg.')
+
 
 class MotorCycle(MotorVehicle):
     def __init__(self, name, speed=55, mpg=25):

@@ -14,7 +14,7 @@ class Cat(Animal):
 
 class Dog(Bat, Cat):
     def __init__(self):
-        super().__init__()
+        super().__init__() #call ALL of the init functions of classes I derive from
         print('Dog: __init__ called ...')
 
 if __name__ == '__main__':
