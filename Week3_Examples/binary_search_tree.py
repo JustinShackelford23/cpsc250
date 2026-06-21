@@ -75,9 +75,9 @@ def get_list_of_names(n):
 
 if __name__ == "__main__":
 
-    names = get_list_of_names(1000)
+    names = get_list_of_names(2000)
 
-    print("Names:", names)
+    #print("Names:", names)
 
     #
     # Example 1: Name is present

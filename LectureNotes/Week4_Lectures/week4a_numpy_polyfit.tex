@@ -1,0 +1,562 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codeblue}{rgb}{0.05,0.15,0.55}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{purple},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\title{CPSC 250 \\ NumPy, Plotting, and Simple Polynomial Fits}
+\author{Edward Brash}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{The Big Idea}
+
+So far, we have used Python lists as containers for data.
+
+Lists are flexible and useful, but they are not designed primarily for numerical computation.
+
+This week, we begin using tools that are designed for scientific and data-oriented computing.
+
+\[
+\text{Lists are containers.}
+\]
+
+\[
+\text{NumPy arrays are mathematical objects.}
+\]
+
+This distinction is extremely important.
+
+\section{Why NumPy?}
+
+NumPy is a Python library for efficient numerical computing.
+
+It allows us to store and manipulate large collections of numbers.
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Python List & NumPy Array \\
+\midrule
+General-purpose container & Numerical data structure \\
+Stores arbitrary objects & Stores numbers efficiently \\
+Often requires loops & Supports vectorized operations \\
+Flexible & Fast \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Importing NumPy}
+
+The usual convention is:
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+\end{lstlisting}
+
+This means that we access NumPy functions using:
+
+\begin{lstlisting}[language=Python]
+np.function_name()
+\end{lstlisting}
+
+\section{Creating a NumPy Array}
+
+We can create a NumPy array from a Python list.
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+values = np.array([1, 2, 3, 4, 5])
+
+print(values)
+\end{lstlisting}
+
+This prints:
+
+\begin{verbatim}
+[1 2 3 4 5]
+\end{verbatim}
+
+\section{Arrays Behave Differently from Lists}
+
+Consider a Python list:
+
+\begin{lstlisting}[language=Python]
+numbers = [1, 2, 3]
+
+print(numbers * 2)
+\end{lstlisting}
+
+This produces:
+
+\begin{verbatim}
+[1, 2, 3, 1, 2, 3]
+\end{verbatim}
+
+The list is repeated.
+
+Now consider a NumPy array:
+
+\begin{lstlisting}[language=Python]
+numbers = np.array([1, 2, 3])
+
+print(numbers * 2)
+\end{lstlisting}
+
+This produces:
+
+\begin{verbatim}
+[2 4 6]
+\end{verbatim}
+
+Each element is multiplied by 2.
+
+\section{Special Arrays}
+
+NumPy provides several useful functions for creating arrays.
+
+\subsection{Zeros and Ones}
+
+\begin{lstlisting}[language=Python]
+zeros = np.zeros(5)
+ones = np.ones(5)
+
+print(zeros)
+print(ones)
+\end{lstlisting}
+
+Output:
+
+\begin{verbatim}
+[0. 0. 0. 0. 0.]
+[1. 1. 1. 1. 1.]
+\end{verbatim}
+
+\subsection{Using arange}
+
+\begin{lstlisting}[language=Python]
+x = np.arange(0, 10, 1)
+
+print(x)
+\end{lstlisting}
+
+Output:
+
+\begin{verbatim}
+[0 1 2 3 4 5 6 7 8 9]
+\end{verbatim}
+
+The syntax is:
+
+\[
+\texttt{np.arange(start, stop, step)}
+\]
+
+\section{Using linspace}
+
+For plotting and numerical work, \texttt{linspace} is often more useful.
+
+\begin{lstlisting}[language=Python]
+x = np.linspace(0, 10, 6)
+
+print(x)
+\end{lstlisting}
+
+Output:
+
+\begin{verbatim}
+[ 0.  2.  4.  6.  8. 10.]
+\end{verbatim}
+
+The syntax is:
+
+\[
+\texttt{np.linspace(start, stop, number\_of\_points)}
+\]
+
+This creates evenly spaced values from the starting value to the ending value.
+
+\section{Vectorized Operations}
+
+Suppose we want to compute:
+
+\[
+y = x^2
+\]
+
+for many values of \(x\).
+
+With a list, we might write a loop.
+
+\begin{lstlisting}[language=Python]
+x_values = [-2, -1, 0, 1, 2]
+y_values = []
+
+for x in x_values:
+    y_values.append(x**2)
+
+print(y_values)
+\end{lstlisting}
+
+With NumPy, we can write:
+
+\begin{lstlisting}[language=Python]
+x = np.array([-2, -1, 0, 1, 2])
+
+y = x**2
+
+print(y)
+\end{lstlisting}
+
+Output:
+
+\begin{verbatim}
+[4 1 0 1 4]
+\end{verbatim}
+
+No loop is required.
+
+\section{Vectorized Physics Example}
+
+Suppose an object moves according to:
+
+\[
+x(t) = x_0 + v_0t + \frac{1}{2}at^2
+\]
+
+We can calculate its position at many times.
+
+\begin{lstlisting}[language=Python]
+t = np.linspace(0, 10, 101)
+
+x0 = 5.0
+v0 = 12.0
+a = -9.8
+
+x = x0 + v0*t + 0.5*a*t**2
+\end{lstlisting}
+
+This calculation happens for every value in the array \texttt{t}.
+
+This is the style of computation used in many scientific Python programs.
+
+\section{Useful NumPy Functions}
+
+NumPy also provides useful statistical and summary functions.
+
+\begin{lstlisting}[language=Python]
+data = np.array([72, 75, 79, 81, 78, 74])
+
+print(np.min(data))
+print(np.max(data))
+print(np.mean(data))
+print(np.std(data))
+\end{lstlisting}
+
+These compute the minimum, maximum, mean, and standard deviation.
+
+\section{Plotting with Matplotlib}
+
+We usually import Matplotlib as:
+
+\begin{lstlisting}[language=Python]
+import matplotlib.pyplot as plt
+\end{lstlisting}
+
+Suppose we have data:
+
+\begin{lstlisting}[language=Python]
+x = np.array([1, 2, 3, 4, 5])
+y = np.array([3, 5, 7, 8, 11])
+\end{lstlisting}
+
+We can make a scatter plot:
+
+\begin{lstlisting}[language=Python]
+plt.scatter(x, y)
+
+plt.xlabel("x")
+plt.ylabel("y")
+
+plt.show()
+\end{lstlisting}
+
+\section{Adding Labels and a Title}
+
+Plots should be readable.
+
+A plot should usually include:
+
+\begin{itemize}
+    \item an \(x\)-axis label,
+    \item a \(y\)-axis label,
+    \item a title,
+    \item a legend, if more than one curve or data set appears.
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+plt.scatter(x, y, label="Data")
+
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Example Data")
+
+plt.legend()
+plt.show()
+\end{lstlisting}
+
+\section{Linear Models}
+
+Many data sets are approximately linear.
+
+A straight line has the form:
+
+\[
+y = mx + b
+\]
+
+where:
+
+\begin{itemize}
+    \item \(m\) is the slope,
+    \item \(b\) is the intercept.
+\end{itemize}
+
+In data analysis, we often want to find the line that best fits a set of data.
+
+\section{Simple Fitting with polyfit}
+
+NumPy includes a function called \texttt{polyfit}.
+
+For a straight-line fit:
+
+\begin{lstlisting}[language=Python]
+m, b = np.polyfit(x, y, 1)
+\end{lstlisting}
+
+The final argument is the degree of the polynomial.
+
+\[
+1 \rightarrow \text{first-degree polynomial}
+\]
+
+A first-degree polynomial is a line:
+
+\[
+y = mx + b
+\]
+
+\section{Example: Finding the Best-Fit Line}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.array([1, 2, 3, 4, 5])
+y = np.array([3, 5, 7, 8, 11])
+
+m, b = np.polyfit(x, y, 1)
+
+print("slope =", m)
+print("intercept =", b)
+\end{lstlisting}
+
+Possible output:
+
+\begin{verbatim}
+slope = 1.9
+intercept = 0.9
+\end{verbatim}
+
+So the best-fit line is approximately:
+
+\[
+y = 1.9x + 0.9
+\]
+
+\section{Plotting the Fit}
+
+Once we have \(m\) and \(b\), we can compute the fitted values.
+
+\begin{lstlisting}[language=Python]
+y_fit = m*x + b
+\end{lstlisting}
+
+Then we plot both the data and the fit.
+
+\begin{lstlisting}[language=Python]
+plt.scatter(x, y, label="Data")
+
+plt.plot(x, y_fit, label="Best-fit line")
+
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Data with Linear Fit")
+
+plt.legend()
+plt.show()
+\end{lstlisting}
+
+\section{A Smoother Fit Line}
+
+The previous plot only draws the line at the original data points.
+
+For a smoother-looking line, create more \(x\)-values.
+
+\begin{lstlisting}[language=Python]
+x_fit = np.linspace(min(x), max(x), 100)
+
+y_fit = m*x_fit + b
+
+plt.scatter(x, y, label="Data")
+plt.plot(x_fit, y_fit, label="Best-fit line")
+
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend()
+
+plt.show()
+\end{lstlisting}
+
+\section{Example: Distance vs Time}
+
+Suppose we measure the position of an object at several times.
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+Time (s) & Distance (m) \\
+\midrule
+0 & 1.2 \\
+1 & 3.1 \\
+2 & 5.4 \\
+3 & 7.0 \\
+4 & 9.3 \\
+5 & 11.1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+We can store the data:
+
+\begin{lstlisting}[language=Python]
+time = np.array([0, 1, 2, 3, 4, 5])
+distance = np.array([1.2, 3.1, 5.4, 7.0, 9.3, 11.1])
+\end{lstlisting}
+
+\section{Fitting the Distance Data}
+
+\begin{lstlisting}[language=Python]
+m, b = np.polyfit(time, distance, 1)
+
+print("slope =", m)
+print("intercept =", b)
+\end{lstlisting}
+
+In this example, the slope has units of:
+
+\[
+\frac{\text{meters}}{\text{second}}
+\]
+
+So the slope represents an estimate of the object's velocity.
+
+\section{Plotting the Distance Data}
+
+\begin{lstlisting}[language=Python]
+time_fit = np.linspace(min(time), max(time), 100)
+
+distance_fit = m*time_fit + b
+
+plt.scatter(time, distance, label="Measurements")
+plt.plot(time_fit, distance_fit, label="Best-fit line")
+
+plt.xlabel("Time (s)")
+plt.ylabel("Distance (m)")
+plt.title("Distance vs Time")
+
+plt.legend()
+plt.show()
+\end{lstlisting}
+
+\section{Higher-Degree Polynomial Fits}
+
+The same function can also fit higher-degree polynomials.
+
+For example:
+
+\begin{lstlisting}[language=Python]
+coefficients = np.polyfit(x, y, 2)
+\end{lstlisting}
+
+This fits a quadratic function:
+
+\[
+y = ax^2 + bx + c
+\]
+
+However, today we will mostly focus on first-degree fits.
+
+\section{A Warning About Polynomial Fits}
+
+Just because we can fit a polynomial does not mean we should.
+
+High-degree polynomials can wiggle in strange ways and may not represent the underlying situation.
+
+For this course, our main goal is simple:
+
+\[
+\text{Use a fit to summarize a trend in the data.}
+\]
+
+\section{Practice}
+
+Write a program that does the following:
+
+\begin{enumerate}
+    \item Creates NumPy arrays for time and distance.
+    \item Makes a scatter plot of the data.
+    \item Uses \texttt{np.polyfit()} to find the best-fit line.
+    \item Prints the slope and intercept.
+    \item Plots the data and the best-fit line together.
+    \item Interprets the slope in words.
+\end{enumerate}
+
+\section{Summary}
+
+Today we learned:
+
+\begin{itemize}
+    \item NumPy arrays are mathematical objects.
+    \item Array operations are vectorized.
+    \item \texttt{linspace} is useful for creating smooth ranges of values.
+    \item Matplotlib lets us visualize numerical data.
+    \item \texttt{np.polyfit()} can find a simple best-fit line.
+    \item The slope and intercept of a fit should be interpreted in context.
+\end{itemize}
+
+\end{document}
