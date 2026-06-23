@@ -1,0 +1,630 @@
+\documentclass[11pt]{article}
+
+% CPSC 250 lecture-note style handout
+\usepackage[margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{amsmath}
+
+\definecolor{cnuBlue}{HTML}{003A70}
+\definecolor{cnuSilver}{HTML}{A2AAAD}
+\definecolor{codeBack}{HTML}{F6F8FA}
+\definecolor{codeFrame}{HTML}{D0D7DE}
+\definecolor{noteBack}{HTML}{EEF6FF}
+\definecolor{warnBack}{HTML}{FFF8E5}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=cnuBlue,
+  urlcolor=cnuBlue
+}
+
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{CPSC 250 / 250L}
+\chead{Git Command Line Summary}
+\rhead{Summer Course Reference}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\Large\bfseries\color{cnuBlue}}{\thesection}{0.75em}{}
+\titleformat{\subsection}{\large\bfseries\color{cnuBlue}}{\thesubsection}{0.75em}{}
+\titleformat{\subsubsection}{\bfseries\color{cnuBlue}}{\thesubsubsection}{0.75em}{}
+
+\lstdefinestyle{terminal}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codeBack},
+  frame=single,
+  rulecolor=\color{codeFrame},
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  upquote=true
+}
+
+\newtcbox{\gitcmd}{on line, boxrule=0.4pt, arc=2pt, colback=codeBack, colframe=codeFrame,
+  left=2pt, right=2pt, top=1pt, bottom=1pt, boxsep=1pt, fontupper=\ttfamily\small}
+
+\newtcolorbox{lecturebox}[1]{
+  colback=noteBack,
+  colframe=cnuBlue,
+  title=\textbf{#1},
+  arc=2pt,
+  boxrule=0.6pt
+}
+
+\newtcolorbox{warningbox}[1]{
+  colback=warnBack,
+  colframe=orange!70!black,
+  title=\textbf{#1},
+  arc=2pt,
+  boxrule=0.6pt
+}
+
+\newcommand{\term}[1]{\textbf{\color{cnuBlue}#1}}
+\newcommand{\repo}{\texttt{cpsc250L}}
+\newcommand{\main}{\texttt{main}}
+\newcommand{\origin}{\texttt{origin}}
+\newcommand{\upstream}{\texttt{upstream}}
+
+\title{\vspace{-0.5in}\textbf{CPSC 250 / 250L\\Command Line Git Reference}\\
+\large A lecture-style summary with examples}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\begin{lecturebox}{Big idea}
+Git is a version-control system.  It keeps a history of your work, lets you move safely between versions, and connects your local copy of a project to a shared copy on GitHub.  In this course, the usual workflow is:
+\[
+\text{edit files} \longrightarrow \text{stage files} \longrightarrow \text{commit locally} \longrightarrow \text{push to GitHub}.
+\]
+\end{lecturebox}
+
+\tableofcontents
+\newpage
+
+\section{The mental model}
+
+A Git project has several important places where files can live.
+
+\begin{center}
+\begin{tabularx}{0.95\textwidth}{@{}lX@{}}
+\toprule
+\term{Place} & \term{Meaning} \\
+\midrule
+Working directory & The actual files you are editing in PyCharm, VS Code, or a terminal. \\
+Staging area & A preparation area for the next commit.  Files get here with \gitcmd{git add}. \\
+Local repository & The saved history on your own computer.  New snapshots get here with \gitcmd{git commit}. \\
+Remote repository & The GitHub copy of the repository.  Your fork is usually called \origin.  The instructor repository is usually called \upstream. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{lecturebox}{Course vocabulary}
+\begin{itemize}[itemsep=2pt]
+  \item \term{Repository}: a folder tracked by Git.
+  \item \term{Commit}: a saved snapshot of the project.
+  \item \term{Branch}: a named line of development.
+  \item \term{Fork}: your GitHub copy of someone else's repository.
+  \item \term{Remote}: a nickname for a GitHub repository connected to your local repository.
+  \item \term{Merge}: combining changes from one branch or repository into another.
+\end{itemize}
+\end{lecturebox}
+
+\section{One-time setup commands}
+
+These commands are usually done once on a computer or once for a repository.
+
+\subsection{Configure your name and email}
+Git records the author of each commit.  The name and email should identify you.
+
+\begin{lstlisting}[style=terminal]
+git config --global user.name "Ada Lovelace"
+git config --global user.email "ada.lovelace.24@cnu.edu"
+\end{lstlisting}
+
+Check your settings:
+
+\begin{lstlisting}[style=terminal]
+git config --global --list
+\end{lstlisting}
+
+\subsection{Clone a repository}
+\gitcmd{git clone} downloads a repository from GitHub and creates a local working copy.
+
+\begin{lstlisting}[style=terminal]
+git clone https://github.com/YOUR-USERNAME/cpsc250L.git
+\end{lstlisting}
+
+Then move into the folder:
+
+\begin{lstlisting}[style=terminal]
+cd cpsc250L
+\end{lstlisting}
+
+\subsection{See the connected remotes}
+\gitcmd{git remote -v} shows the GitHub repositories connected to your local repository.
+
+\begin{lstlisting}[style=terminal]
+git remote -v
+\end{lstlisting}
+
+Typical course output:
+
+\begin{lstlisting}[style=terminal]
+origin    https://github.com/YOUR-USERNAME/cpsc250L.git (fetch)
+origin    https://github.com/YOUR-USERNAME/cpsc250L.git (push)
+upstream  https://github.com/brash99/cpsc250L.git (fetch)
+upstream  https://github.com/brash99/cpsc250L.git (push)
+\end{lstlisting}
+
+\subsection{Add the instructor repository as upstream}
+If your local repository only knows about your fork, add the instructor repository as \upstream.
+
+\begin{lstlisting}[style=terminal]
+git remote add upstream https://github.com/brash99/cpsc250L.git
+\end{lstlisting}
+
+\subsection{Change a remote URL}
+Sometimes a remote points to the wrong GitHub repository.  Change it with \gitcmd{git remote set-url}.
+
+\begin{lstlisting}[style=terminal]
+git remote set-url upstream https://github.com/brash99/cpsc250L-instructor.git
+\end{lstlisting}
+
+Then verify:
+
+\begin{lstlisting}[style=terminal]
+git remote -v
+\end{lstlisting}
+
+\section{The daily save-and-submit workflow}
+
+\subsection{Check the current state}
+The most important Git command is \gitcmd{git status}.  Use it constantly.
+
+\begin{lstlisting}[style=terminal]
+git status
+\end{lstlisting}
+
+Common messages:
+
+\begin{center}
+\begin{tabularx}{0.95\textwidth}{@{}lX@{}}
+\toprule
+\term{Message} & \term{Meaning} \\
+\midrule
+\texttt{nothing to commit, working tree clean} & Git sees no unsaved changes. \\
+\texttt{Changes not staged for commit} & Files changed, but they are not yet prepared for the next commit. \\
+\texttt{Untracked files} & Git sees new files that have not yet been added. \\
+\texttt{Changes to be committed} & Files are staged and ready to commit. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Stage files}
+To stage one file:
+
+\begin{lstlisting}[style=terminal]
+git add labs/lab03_functions/solution.py
+\end{lstlisting}
+
+To stage every changed file in the current repository:
+
+\begin{lstlisting}[style=terminal]
+git add .
+\end{lstlisting}
+
+\begin{warningbox}{Important habit}
+Before using \gitcmd{git add .}, run \gitcmd{git status}.  Make sure you are not accidentally adding temporary files, large data files, or virtual-environment folders.
+\end{warningbox}
+
+\subsection{Commit staged files}
+A commit saves a snapshot in your local repository.
+
+\begin{lstlisting}[style=terminal]
+git commit -m "Complete lab 03 functions"
+\end{lstlisting}
+
+Good commit messages are short, specific, and written in the imperative style:
+
+\begin{lstlisting}[style=terminal]
+git commit -m "Add CSV parsing for lab 04"
+git commit -m "Fix Plant __str__ method"
+git commit -m "Refactor book search into helper function"
+\end{lstlisting}
+
+\subsection{Push your commits to GitHub}
+A commit is still only on your computer until you push it.
+
+\begin{lstlisting}[style=terminal]
+git push
+\end{lstlisting}
+
+The first push from a new branch may need:
+
+\begin{lstlisting}[style=terminal]
+git push -u origin lab05-feature
+\end{lstlisting}
+
+After that, \gitcmd{git push} is usually enough.
+
+\section{Getting updates from GitHub}
+
+\subsection{Fetch without changing your files}
+\gitcmd{git fetch} contacts GitHub and downloads information about new commits, but it does not merge them into your current branch.
+
+\begin{lstlisting}[style=terminal]
+git fetch upstream
+\end{lstlisting}
+
+This is a safe way to ask, ``What has changed in the instructor repository?''
+
+\subsection{Pull from your own GitHub fork}
+\gitcmd{git pull} fetches and then merges changes into your current branch.
+
+\begin{lstlisting}[style=terminal]
+git pull
+\end{lstlisting}
+
+This is commonly used when your GitHub fork has changes that your local computer does not yet have.
+
+\subsection{Update your local main branch from the instructor repository}
+A common course pattern is:
+
+\begin{lstlisting}[style=terminal]
+git switch main
+git fetch upstream
+git merge upstream/main
+\end{lstlisting}
+
+This says:
+
+\begin{enumerate}[itemsep=2pt]
+  \item Move to your local \main{} branch.
+  \item Get the latest information from the instructor repository.
+  \item Merge the instructor's \main{} branch into your local \main{} branch.
+\end{enumerate}
+
+Then push the updated version of your fork:
+
+\begin{lstlisting}[style=terminal]
+git push origin main
+\end{lstlisting}
+
+\section{Looking at history and changes}
+
+\subsection{View the commit history}
+
+\begin{lstlisting}[style=terminal]
+git log
+\end{lstlisting}
+
+A compact version is often easier to read:
+
+\begin{lstlisting}[style=terminal]
+git log --oneline
+\end{lstlisting}
+
+A useful branch graph view:
+
+\begin{lstlisting}[style=terminal]
+git log --oneline --graph --decorate --all
+\end{lstlisting}
+
+\subsection{See unstaged changes}
+\gitcmd{git diff} shows changes in the working directory that have not been staged.
+
+\begin{lstlisting}[style=terminal]
+git diff
+\end{lstlisting}
+
+\subsection{See staged changes}
+After \gitcmd{git add}, use:
+
+\begin{lstlisting}[style=terminal]
+git diff --staged
+\end{lstlisting}
+
+This answers: ``What exactly am I about to commit?''
+
+\section{Branches}
+
+Branches allow us to work on a feature or lab without immediately changing \main{}.
+
+\subsection{List branches}
+
+\begin{lstlisting}[style=terminal]
+git branch
+\end{lstlisting}
+
+Show local and remote branches:
+
+\begin{lstlisting}[style=terminal]
+git branch -a
+\end{lstlisting}
+
+\subsection{Create and switch to a new branch}
+
+\begin{lstlisting}[style=terminal]
+git switch -c lab05-feature
+\end{lstlisting}
+
+Older Git examples often use \gitcmd{checkout} instead:
+
+\begin{lstlisting}[style=terminal]
+git checkout -b lab05-feature
+\end{lstlisting}
+
+\subsection{Switch between existing branches}
+
+\begin{lstlisting}[style=terminal]
+git switch main
+git switch lab05-feature
+\end{lstlisting}
+
+Older style:
+
+\begin{lstlisting}[style=terminal]
+git checkout main
+\end{lstlisting}
+
+\subsection{Merge a feature branch into main}
+
+\begin{lstlisting}[style=terminal]
+git switch main
+git merge lab05-feature
+\end{lstlisting}
+
+Then push:
+
+\begin{lstlisting}[style=terminal]
+git push origin main
+\end{lstlisting}
+
+\subsection{Delete a finished branch}
+After the branch has been merged:
+
+\begin{lstlisting}[style=terminal]
+git branch -d lab05-feature
+\end{lstlisting}
+
+Force-delete a branch only when you are sure you do not need it:
+
+\begin{lstlisting}[style=terminal]
+git branch -D lab05-feature
+\end{lstlisting}
+
+\section{Undoing and fixing mistakes}
+
+\subsection{Unstage a file}
+If you staged a file with \gitcmd{git add} but do not want it in the next commit:
+
+\begin{lstlisting}[style=terminal]
+git restore --staged labs/lab04_csv/solution.py
+\end{lstlisting}
+
+Older Git examples may use:
+
+\begin{lstlisting}[style=terminal]
+git reset HEAD labs/lab04_csv/solution.py
+\end{lstlisting}
+
+\subsection{Discard local changes to a file}
+This throws away uncommitted changes to a file and restores the last committed version.
+
+\begin{lstlisting}[style=terminal]
+git restore labs/lab04_csv/solution.py
+\end{lstlisting}
+
+\begin{warningbox}{This is destructive}
+Only use \gitcmd{git restore FILE} when you really want to lose the uncommitted edits in that file.
+\end{warningbox}
+
+\subsection{Fix the most recent commit message}
+
+\begin{lstlisting}[style=terminal]
+git commit --amend -m "Complete lab 04 CSV processing"
+\end{lstlisting}
+
+Use this before pushing when possible.  Amending a commit that has already been pushed can confuse shared history.
+
+\subsection{Revert a committed change safely}
+\gitcmd{git revert} creates a new commit that undoes an earlier commit.
+
+\begin{lstlisting}[style=terminal]
+git log --oneline
+git revert abc1234
+\end{lstlisting}
+
+This is safer than rewriting history because it preserves the record of what happened.
+
+\section{Merge conflicts}
+
+A merge conflict happens when Git cannot automatically combine two versions of a file.
+
+\subsection{Typical conflict workflow}
+
+\begin{lstlisting}[style=terminal]
+git status
+# Open the conflicted file and edit it by hand.
+git add conflicted_file.py
+git commit
+\end{lstlisting}
+
+Conflict markers look like this:
+
+\begin{lstlisting}[style=terminal]
+<<<<<<< HEAD
+print("My version")
+=======
+print("Other version")
+>>>>>>> upstream/main
+\end{lstlisting}
+
+Your job is to edit the file into the version that should remain, then remove the conflict markers.
+
+\section{Files Git should ignore}
+
+Some files do not belong in the repository: virtual environments, cache files, temporary files, and generated output.  Put patterns for these files in \texttt{.gitignore}.
+
+Example \texttt{.gitignore} entries for Python work:
+
+\begin{lstlisting}[style=terminal]
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.idea/
+\end{lstlisting}
+
+After editing \texttt{.gitignore}, commit it like any other file:
+
+\begin{lstlisting}[style=terminal]
+git add .gitignore
+git commit -m "Update Python gitignore rules"
+git push
+\end{lstlisting}
+
+\section{Common course scenarios}
+
+\subsection{Scenario 1: Submit today's lab}
+
+\begin{lstlisting}[style=terminal]
+git status
+git add labs/lab04_csv_processing/solution.py
+git status
+git commit -m "Complete lab 04 CSV processing"
+git push
+\end{lstlisting}
+
+\subsection{Scenario 2: Get the latest lab files from the instructor repository}
+
+\begin{lstlisting}[style=terminal]
+git switch main
+git status
+git fetch upstream
+git merge upstream/main
+git push origin main
+\end{lstlisting}
+
+\subsection{Scenario 3: Start a new lab branch}
+
+\begin{lstlisting}[style=terminal]
+git switch main
+git pull
+git switch -c lab05-classes
+\end{lstlisting}
+
+Work on the lab, then save it:
+
+\begin{lstlisting}[style=terminal]
+git add labs/lab05_classes_feature_branches/
+git commit -m "Complete lab 05 classes"
+git push -u origin lab05-classes
+\end{lstlisting}
+
+\subsection{Scenario 4: Merge your lab branch back into main}
+
+\begin{lstlisting}[style=terminal]
+git switch main
+git merge lab05-classes
+git push origin main
+\end{lstlisting}
+
+\subsection{Scenario 5: Diagnose a weird repository problem}
+Start with read-only commands:
+
+\begin{lstlisting}[style=terminal]
+git status
+git branch -a
+git remote -v
+git log --oneline --graph --decorate --all
+\end{lstlisting}
+
+These commands do not change the repository.  They help you see where you are before deciding what to do.
+
+\section{Command summary table}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\term{Command} & \term{Purpose} \\
+\midrule
+\gitcmd{git config --global user.name "Name"} & Set the author name for commits. \\
+\gitcmd{git config --global user.email "email"} & Set the author email for commits. \\
+\gitcmd{git clone URL} & Download a repository from GitHub. \\
+\gitcmd{git status} & Show changed, staged, and untracked files. \\
+\gitcmd{git add FILE} & Stage a file for the next commit. \\
+\gitcmd{git add .} & Stage all changes in the current repository. \\
+\gitcmd{git commit -m "message"} & Save a local snapshot. \\
+\gitcmd{git push} & Upload local commits to GitHub. \\
+\gitcmd{git pull} & Download and merge changes from the default remote branch. \\
+\gitcmd{git fetch upstream} & Download information from the instructor repository without merging. \\
+\gitcmd{git merge upstream/main} & Merge instructor changes into the current branch. \\
+\gitcmd{git remote -v} & List connected GitHub repositories. \\
+\gitcmd{git remote add upstream URL} & Add the instructor repository as a remote. \\
+\gitcmd{git remote set-url upstream URL} & Change where a remote points. \\
+\gitcmd{git branch} & List local branches. \\
+\gitcmd{git branch -a} & List local and remote branches. \\
+\gitcmd{git switch BRANCH} & Move to an existing branch. \\
+\gitcmd{git switch -c BRANCH} & Create and move to a new branch. \\
+\gitcmd{git checkout BRANCH} & Older command for switching branches. \\
+\gitcmd{git checkout -b BRANCH} & Older command for creating and switching to a branch. \\
+\gitcmd{git log --oneline} & Show compact commit history. \\
+\gitcmd{git diff} & Show unstaged changes. \\
+\gitcmd{git diff --staged} & Show staged changes. \\
+\gitcmd{git restore --staged FILE} & Unstage a file. \\
+\gitcmd{git restore FILE} & Discard uncommitted changes to a file. \\
+\gitcmd{git commit --amend} & Modify the most recent commit. \\
+\gitcmd{git revert HASH} & Safely undo an old commit by creating a new commit. \\
+\gitcmd{git branch -d BRANCH} & Delete a merged local branch. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{A final checklist before asking for help}
+
+When Git seems confusing, run these commands and read the output carefully:
+
+\begin{lstlisting}[style=terminal]
+git status
+git branch -a
+git remote -v
+git log --oneline --graph --decorate --all
+\end{lstlisting}
+
+Then ask:
+
+\begin{enumerate}[itemsep=2pt]
+  \item What branch am I on?
+  \item Are my files changed, staged, committed, or pushed?
+  \item Is \origin{} my fork?
+  \item Is \upstream{} the instructor repository?
+  \item Am I trying to save my work, submit my work, or get new instructor files?
+\end{enumerate}
+
+\begin{lecturebox}{The safest Git habit}
+Use \gitcmd{git status} before and after every important Git command.  Git usually tells you exactly what state the repository is in and what command might make sense next.
+\end{lecturebox}
+
+\end{document}

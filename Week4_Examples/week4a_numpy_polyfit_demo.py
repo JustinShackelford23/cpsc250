@@ -176,7 +176,7 @@ def demo_polyfit_line() -> None:
 
     plt.figure()
     plt.scatter(x, y, label="Data")
-    plt.plot(x, y_fit, label="Best-fit line")
+    plt.plot(x, y_fit, 'r-',label="Best-fit line")
     plt.xlabel("x")
     plt.ylabel("y")
     plt.title("Data with Linear Fit")
