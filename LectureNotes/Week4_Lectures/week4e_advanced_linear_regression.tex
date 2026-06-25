@@ -7,6 +7,8 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}      % optional, if you use [H]
 
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 \definecolor{codeblue}{rgb}{0.05,0.15,0.55}
@@ -249,7 +251,153 @@ where:
     \item \(\mathbf{\beta}\) is the parameter vector.
 \end{itemize}
 
-\section{Linear Algebra Perspective}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{matrix_formulation_diagram.png}
+    \caption{Moving from the individual regression equations to the matrix equation
+    $\mathbf{y}=X\boldsymbol{\beta}+\boldsymbol{\epsilon}$. Notice that the first
+    column of the design matrix $X$ consists entirely of ones. This column
+    corresponds to the intercept coefficient $\beta_0$, which explains why
+    packages such as \lstinline|statsmodels| require us to explicitly add a
+    constant column using \lstinline|sm.add_constant(X)|.}
+    \label{fig:matrix_formulation}
+\end{figure}
+
+\section{Solving for the Regression Parameters}
+
+The matrix equation
+
+\[
+\mathbf{y}=X\boldsymbol{\beta}
+\]
+
+looks deceptively similar to an ordinary algebraic equation. Unfortunately, we
+cannot simply "divide by $X$" because $X$ is generally \emph{not} a square
+matrix.
+
+Suppose there are $N$ data points and $M$ fitting parameters. Then
+
+\[
+X
+\]
+
+has dimensions
+
+\[
+N \times M.
+\]
+
+For example, if we fit a straight line,
+
+\[
+y=\beta_0+\beta_1x,
+\]
+
+to one hundred data points, then
+
+\[
+X
+\]
+
+has dimensions
+
+\[
+100 \times 2.
+\]
+
+Since $X$ is not square, the inverse
+
+\[
+X^{-1}
+\]
+
+does not exist.
+
+The key idea is therefore to transform the problem into one involving a
+\emph{square} matrix.
+
+We do this by multiplying both sides of the equation by the transpose of $X$:
+
+\[
+X^T\mathbf{y}=X^TX\boldsymbol{\beta}.
+\]
+
+Now examine the dimensions:
+
+\[
+X^T
+\quad\rightarrow\quad
+M\times N
+\]
+
+and
+
+\[
+X
+\quad\rightarrow\quad
+N\times M.
+\]
+
+Therefore,
+
+\[
+X^TX
+\]
+
+has dimensions
+
+\[
+(M\times N)(N\times M)
+=
+M\times M.
+\]
+
+This is now a square matrix.
+
+Provided the columns of $X$ are linearly independent, the matrix $X^TX$ is
+invertible, allowing us to solve for the unknown parameter vector:
+
+\[
+\boxed{
+\boldsymbol{\beta}
+=
+(X^TX)^{-1}X^T\mathbf{y}
+}
+\]
+
+This equation is known as the \emph{normal equation} for linear least-squares
+regression.
+
+\subsection*{The Big Picture}
+
+One of the most important ideas in this course is that we have transformed a
+data-analysis problem into a linear algebra problem.
+
+Originally, our goal was to determine the unknown regression parameters
+$\beta_0,\beta_1,\ldots$ that best describe a set of measured data.
+
+By constructing the design matrix $X$, we reformulated the problem as
+
+\[
+\mathbf{y}=X\boldsymbol{\beta},
+\]
+
+and ultimately reduced the entire regression problem to computing the inverse
+of the matrix
+
+\[
+X^TX.
+\]
+
+Thus, from a computational point of view,
+
+\[
+\boxed{\text{Linear regression is fundamentally a matrix inversion problem.}}
+\]
+
+Modern software packages such as \lstinline|statsmodels| and
+\lstinline|scikit-learn| hide these details from the user, but this is the
+underlying mathematics that they are performing behind the scenes.
 
 In principle:
 
@@ -302,24 +450,6 @@ N \times M
 
 data structures for independent variables.
 
-\section{Printing NumPy Arrays}
-
-NumPy arrays display differently from Python lists.
-
-For example:
-
-\begin{lstlisting}[language=Python]
-print(y)
-\end{lstlisting}
-
-may display:
-
-\begin{lstlisting}
-[1.1 2.1 2.9 3.9 5.1]
-\end{lstlisting}
-
-without commas.
-
 \section{Data Cleaning}
 
 Before fitting, we should:
@@ -330,6 +460,45 @@ Before fitting, we should:
     \item identify outliers,
     \item think about appropriate models.
 \end{itemize}
+
+\section{Putting It All Together}
+
+We now have all of the pieces needed to perform multiple linear regression on
+a real dataset.
+
+Suppose a company records the following information for many advertising
+campaigns:
+
+\begin{itemize}
+    \item television advertising budget,
+    \item radio advertising budget,
+    \item newspaper advertising budget,
+    \item resulting product sales.
+\end{itemize}
+
+Our goal is to determine how strongly each advertising medium influences sales.
+
+Using the notation developed above, the regression model becomes
+
+\[
+\text{Sales}
+=
+\beta_0
++
+\beta_1(\text{TV})
++
+\beta_2(\text{Radio})
++
+\beta_3(\text{Newspaper}).
+\]
+
+Each row of the design matrix corresponds to one advertising campaign, while
+each column corresponds to one explanatory variable (plus the column of ones
+used to determine the intercept).
+
+Fortunately, Python libraries such as \lstinline|statsmodels| perform the
+matrix computations automatically. The following example illustrates how this
+is done in practice.
 
 \section{Key Takeaways}
 

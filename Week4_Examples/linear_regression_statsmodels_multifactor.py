@@ -22,7 +22,7 @@ ax[0][2].set_xlabel('Newspaper Advertising Costs')
 ax[0][2].set_ylabel('Sales')
 
 
-do_fit = True
+do_fit = False
 
 if do_fit:
     # Fit a linear regression model to a single parameter - Sales vs. TV advertising costs
@@ -41,7 +41,7 @@ if do_fit:
     advert['Sales_TV_Residual'] = advert['Sales'] - sales_pred
     print(advert.head())
 
-do_plot = True
+do_plot = False
 
 if do_plot:
     # Plot regression against actual data
@@ -55,7 +55,7 @@ if do_plot:
     ax[1][1].set_xlabel('Radio Advertising Costs')
     ax[1][1].set_ylabel('Sales Residuals')
 
-do_fit2 = True
+do_fit2 = False
 
 if do_fit2:
     # Fit a linear regression model to a single parameter - Sales_TV_Residual vs. Radio advertising costs
@@ -70,7 +70,7 @@ if do_fit2:
     advert['Sales_TV_Radio_Residual'] = advert['Sales_TV_Residual'] - sales_pred2
     print(advert.head())
 
-do_plot2 = True
+do_plot2 = False
 
 if do_plot2:
     ax[1][1].plot(advert['Radio'], sales_pred2, 'o', label = "Data")  # scatter plot showing actual data
